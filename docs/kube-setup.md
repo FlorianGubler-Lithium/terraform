@@ -68,7 +68,7 @@ scp <USER>@<MASTER-HOST-IP>:/tmp/config <LOCAL-USER-HOME-PATH>\.kube
 ```
 
 ## 7. Install Calico Network Manager
-See: [Calico Installation]https://docs.tigera.io/calico/latest/getting-started/kubernetes/helm)
+See: [Calico Installation](https://docs.tigera.io/calico/latest/getting-started/kubernetes/helm)
 
 ## 8. Install operators with helm using Github Actions
 See Github Actions -> Deploy
