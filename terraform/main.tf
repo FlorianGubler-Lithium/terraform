@@ -15,16 +15,6 @@ provider "proxmox" {
 }
 
 #########################
-# Automatic node lookup
-#########################
-
-data "proxmox_nodes" "cluster_nodes" {}
-
-locals {
-  target_node = data.proxmox_nodes.cluster_nodes.names[0]
-}
-
-#########################
 # Network Zones (VLAN)
 #########################
 
@@ -56,7 +46,7 @@ locals {
 resource "proxmox_vm_qemu" "firewall" {
 
   name        = "cluster-firewall"
-  target_node = local.target_node
+  target_node = var.pm_node
   clone       = var.firewall_template
 
   cores  = 2
@@ -122,7 +112,7 @@ resource "proxmox_vm_qemu" "dev_vms" {
   count = length(local.dev_vms)
 
   name        = local.dev_vms[count.index]
-  target_node = local.target_node
+  target_node = var.pm_node
   clone       = var.debian_template
 
   cores  = 2
@@ -141,7 +131,7 @@ resource "proxmox_vm_qemu" "prod_vms" {
   count = length(local.prod_vms)
 
   name        = local.prod_vms[count.index]
-  target_node = local.target_node
+  target_node = var.pm_node
   clone       = var.debian_template
 
   cores  = 2
@@ -160,7 +150,7 @@ resource "proxmox_vm_qemu" "infra_vms" {
   count = length(local.infra_vms)
 
   name        = local.infra_vms[count.index]
-  target_node = local.target_node
+  target_node = var.pm_node
   clone       = var.debian_template
 
   cores  = 2
