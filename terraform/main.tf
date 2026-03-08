@@ -1,52 +1,175 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source  = "Telmate/proxmox"
+      version = ">=2.9"
+    }
+  }
+}
+
 provider "proxmox" {
-  pm_api_url      = var.proxmox_api_url
-  pm_user         = var.proxmox_user
-  pm_password     = var.proxmox_password
+  pm_api_url      = var.pm_api_url
+  pm_user         = var.pm_user
+  pm_password     = var.pm_password
   pm_tls_insecure = true
 }
 
-# Example VM creation
-resource "proxmox_vm_qemu" "k8s_master" {
-  name   = "k8s-master-01"
-  cores  = 4
-  memory = 8192
-  disk {
-    size = "50G"
-  }
-  network {
-    model  = "virtio"
-    bridge = "vmbr0"
-  }
-  os_type   = "cloud-init"
-  ssh_keys  = file("~/.ssh/id_rsa.pub")
-  iso       = "local:iso/ubuntu-24.04.iso"
+#########################
+# Automatic node lookup
+#########################
+
+data "proxmox_nodes" "cluster_nodes" {}
+
+locals {
+  target_node = data.proxmox_nodes.cluster_nodes.names[0]
 }
 
-resource "proxmox_vm_qemu" "k8s_worker" {
-  count  = 2
-  name   = "k8s-worker-${count.index + 1}"
+#########################
+# Network Zones (VLAN)
+#########################
+
+locals {
+
+  zones = {
+    devzone = {
+      vlan = 100
+      subnet = "10.10.0.0/24"
+    }
+
+    prodzone = {
+      vlan = 200
+      subnet = "10.20.0.0/24"
+    }
+
+    infrazone = {
+      vlan = 300
+      subnet = "10.30.0.0/24"
+    }
+  }
+
+}
+
+#########################
+# Firewall Router VM
+#########################
+
+resource "proxmox_vm_qemu" "firewall" {
+
+  name        = "cluster-firewall"
+  target_node = local.target_node
+  clone       = var.firewall_template
+
   cores  = 2
   memory = 4096
-  disk {
-    size = "40G"
+
+  agent = 1
+
+  network {
+    bridge = "vmbr0"
+    model  = "virtio"
   }
+
+  network {
+    bridge = "vmbr0"
+    tag    = local.zones.devzone.vlan
+    model  = "virtio"
+  }
+
+  network {
+    bridge = "vmbr0"
+    tag    = local.zones.prodzone.vlan
+    model  = "virtio"
+  }
+
+  network {
+    bridge = "vmbr0"
+    tag    = local.zones.infrazone.vlan
+    model  = "virtio"
+  }
+
+}
+
+############################
+# VM Definitions
+############################
+
+locals {
+
+  dev_vms = {
+    kube-dev-master-001 = { zone = "devzone", role = "master" }
+    kube-dev-worker-001 = { zone = "devzone", role = "worker" }
+    kube-dev-worker-002 = { zone = "devzone", role = "worker" }
+    mgmt-dev-001 = { zone = "devzone", role = "mgmt" }
+  }
+
+  prod_vms = {
+    kube-prod-master-001 = { zone = "prodzone", role = "master" }
+    kube-prod-worker-002 = { zone = "prodzone", role = "worker" }
+    kube-prod-worker-002 = { zone = "prodzone", role = "worker" }
+    mgmt-prod-001 = { zone = "prodzone", role = "mgmt" }
+  }
+
+  infra_vms = {
+    jump-001 = { zone = "infrazone", role = "jump" }
+    proxy-001 = { zone = "infrazone", role = "proxy" }
+  }
+
+  all_vms = merge(local.dev_vms, local.prod_vms, local.infra_vms)
+}
+
+resource "proxmox_vm_qemu" "dev_vms" {
+
+  count = length(local.dev_vms)
+
+  name        = local.dev_vms[count.index]
+  target_node = local.target_node
+  clone       = var.debian_template
+
+  cores  = 2
+  memory = 4096
+
   network {
     model  = "virtio"
     bridge = "vmbr0"
+    tag    = local.zones.devzone.vlan
   }
-  os_type  = "cloud-init"
-  ssh_keys = file("~/.ssh/id_rsa.pub")
-  iso      = "local:iso/ubuntu-24.04.iso"
+
 }
 
-# Trigger Ansible bootstrap
-resource "null_resource" "bootstrap_k8s" {
-  depends_on = [
-    proxmox_vm_qemu.k8s_master,
-    proxmox_vm_qemu.k8s_worker
-  ]
+resource "proxmox_vm_qemu" "prod_vms" {
 
-  provisioner "local-exec" {
-    command = "ansible-playbook -i ../ansible/inventory.ini ../ansible/playbooks/bootstrap-k8s.yml"
+  count = length(local.prod_vms)
+
+  name        = local.prod_vms[count.index]
+  target_node = local.target_node
+  clone       = var.debian_template
+
+  cores  = 2
+  memory = 4096
+
+  network {
+    model  = "virtio"
+    bridge = "vmbr0"
+    tag    = local.zones.prodzone.vlan
   }
+
+}
+
+resource "proxmox_vm_qemu" "infra_vms" {
+
+  count = length(local.infra_vms)
+
+  name        = local.infra_vms[count.index]
+  target_node = local.target_node
+  clone       = var.debian_template
+
+  cores  = 2
+  memory = 4096
+
+  network {
+    model  = "virtio"
+    bridge = "vmbr0"
+    tag    = local.zones.infrazone.vlan
+  }
+
 }
