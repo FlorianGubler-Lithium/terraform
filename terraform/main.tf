@@ -109,9 +109,9 @@ locals {
 
 resource "proxmox_vm_qemu" "dev_vms" {
 
-  count = length(local.dev_vms)
+  for_each = local.dev_vms
 
-  name        = local.dev_vms[count.index]
+  name        = each.key
   target_node = var.pm_node
   clone       = var.debian_template
 
@@ -128,9 +128,9 @@ resource "proxmox_vm_qemu" "dev_vms" {
 
 resource "proxmox_vm_qemu" "prod_vms" {
 
-  count = length(local.prod_vms)
+  for_each = local.prod_vms
 
-  name        = local.prod_vms[count.index]
+  name        = each.key
   target_node = var.pm_node
   clone       = var.debian_template
 
@@ -147,9 +147,9 @@ resource "proxmox_vm_qemu" "prod_vms" {
 
 resource "proxmox_vm_qemu" "infra_vms" {
 
-  count = length(local.infra_vms)
+  for_each = local.infra_vms
 
-  name        = local.infra_vms[count.index]
+  name        = each.key
   target_node = var.pm_node
   clone       = var.debian_template
 
