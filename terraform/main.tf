@@ -95,21 +95,12 @@ resource "proxmox_vm_qemu" "firewall" {
 
   agent = 1
 
-  # Root disk
-  virtio {
-    id           = 0
-    iothread     = 1
-    cache        = "writeback"
-    size         = "50G"
-    storage      = "local-lvm"
-    file_format  = "raw"
-  }
-
-  # CD-ROM for ISO
-  ide {
-    id       = 2
-    media    = "cdrom"
-    file     = var.debian_iso
+  # Root disk configuration
+  disk {
+    type    = "scsi"
+    storage = "local-lvm"
+    size    = "50G"
+    format  = "raw"
   }
 
   # Management interface
@@ -224,21 +215,12 @@ resource "proxmox_vm_qemu" "dev_vms" {
 
   agent = 1
 
-  # Root disk
-  virtio {
-    id           = 0
-    iothread     = 1
-    cache        = "writeback"
-    size         = "50G"
-    storage      = "local-lvm"
-    file_format  = "raw"
-  }
-
-  # CD-ROM for ISO
-  ide {
-    id       = 2
-    media    = "cdrom"
-    file     = var.debian_iso
+  # Root disk configuration
+  disk {
+    type    = "scsi"
+    storage = "local-lvm"
+    size    = "50G"
+    format  = "raw"
   }
 
   network {
@@ -272,21 +254,12 @@ resource "proxmox_vm_qemu" "prod_vms" {
 
   agent = 1
 
-  # Root disk
-  virtio {
-    id           = 0
-    iothread     = 1
-    cache        = "writeback"
-    size         = "50G"
-    storage      = "local-lvm"
-    file_format  = "raw"
-  }
-
-  # CD-ROM for ISO
-  ide {
-    id       = 2
-    media    = "cdrom"
-    file     = var.debian_iso
+  # Root disk configuration
+  disk {
+    type    = "scsi"
+    storage = "local-lvm"
+    size    = "50G"
+    format  = "raw"
   }
 
   network {
@@ -320,21 +293,12 @@ resource "proxmox_vm_qemu" "infra_vms" {
 
   agent = 1
 
-  # Root disk
-  virtio {
-    id           = 0
-    iothread     = 1
-    cache        = "writeback"
-    size         = "50G"
-    storage      = "local-lvm"
-    file_format  = "raw"
-  }
-
-  # CD-ROM for ISO
-  ide {
-    id       = 2
-    media    = "cdrom"
-    file     = var.debian_iso
+  # Root disk configuration
+  disk {
+    type    = "scsi"
+    storage = "local-lvm"
+    size    = "50G"
+    format  = "raw"
   }
 
   network {
