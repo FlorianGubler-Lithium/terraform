@@ -86,13 +86,16 @@ resource "proxmox_vm_qemu" "firewall" {
   name        = "cluster-firewall"
   target_node = var.pm_node
 
-  vmid  = 100
-  cores = 2
+  vmid   = 100
   memory = 4096
 
   boot = "order=scsi0"
 
   agent = 1
+
+  cpu {
+    cores = 2
+  }
 
   disks {
     ide {
@@ -221,12 +224,15 @@ resource "proxmox_vm_qemu" "dev_vms" {
   target_node = var.pm_node
 
   vmid   = 1000 + index(sort(keys(local.dev_vms)), each.key)
-  cores  = 2
   memory = 4096
 
   boot = "order=scsi0"
 
   agent = 1
+
+  cpu {
+    cores = 2
+  }
 
   disks {
     ide {
@@ -271,12 +277,15 @@ resource "proxmox_vm_qemu" "prod_vms" {
   target_node = var.pm_node
 
   vmid   = 2000 + index(sort(keys(local.prod_vms)), each.key)
-  cores  = 2
   memory = 4096
 
   boot = "order=scsi0"
 
   agent = 1
+
+  cpu {
+    cores = 2
+  }
 
   disks {
     ide {
@@ -321,12 +330,15 @@ resource "proxmox_vm_qemu" "infra_vms" {
   target_node = var.pm_node
 
   vmid   = 3000 + index(sort(keys(local.infra_vms)), each.key)
-  cores  = 2
   memory = 4096
 
   boot = "order=scsi0"
 
   agent = 1
+
+  cpu {
+    cores = 2
+  }
 
   disks {
     ide {
