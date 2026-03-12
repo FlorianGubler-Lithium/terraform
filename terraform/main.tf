@@ -89,7 +89,7 @@ resource "proxmox_vm_qemu" "firewall" {
   vmid   = 100
   memory = 4096
 
-  boot = "qemu=ide2,scsi0"
+  boot = "ide2,scsi0"
 
   agent = 1
 
@@ -223,7 +223,7 @@ resource "proxmox_vm_qemu" "dev_vms" {
   vmid   = 1000 + index(sort(keys(local.dev_vms)), each.key)
   memory = 4096
 
-  boot = "qemu=ide2,scsi0"
+  boot = "ide2,scsi0"
 
   agent = 1
 
@@ -275,7 +275,7 @@ resource "proxmox_vm_qemu" "prod_vms" {
   vmid   = 2000 + index(sort(keys(local.prod_vms)), each.key)
   memory = 4096
 
-  boot = "qemu=ide2,scsi0"
+  boot = "ide2,scsi0"
 
   agent = 1
 
@@ -327,7 +327,7 @@ resource "proxmox_vm_qemu" "infra_vms" {
   vmid   = 3000 + index(sort(keys(local.infra_vms)), each.key)
   memory = 4096
 
-  boot = "qemu=ide2,scsi0"
+  boot = "ide2,scsi0"
 
   agent = 1
 
