@@ -89,7 +89,7 @@ resource "proxmox_vm_qemu" "firewall" {
   vmid   = 100
   memory = 4096
 
-  boot = "order=ide2;scsi0"
+  boot = "order=scsi0"
 
   agent = 1
 
@@ -98,13 +98,6 @@ resource "proxmox_vm_qemu" "firewall" {
   }
 
   disks {
-    ide {
-      ide2 {
-        cdrom {
-          iso = var.debian_iso
-        }
-      }
-    }
     scsi {
       scsi0 {
         disk {
@@ -223,7 +216,7 @@ resource "proxmox_vm_qemu" "dev_vms" {
   vmid   = 1000 + index(sort(keys(local.dev_vms)), each.key)
   memory = 4096
 
-  boot = "order=ide2;scsi0"
+  boot = "order=scsi0"
 
   agent = 1
 
@@ -232,20 +225,12 @@ resource "proxmox_vm_qemu" "dev_vms" {
   }
 
   disks {
-    ide {
-      ide2 {
-        cdrom {
-          iso = var.debian_iso
-        }
-      }
-    }
-    scsi {
-      scsi0 {
-        disk {
-          storage = "local-lvm"
-          size    = 50
-          format  = "raw"
-        }
+    scsi0 {
+      disk {
+        storage = "local-lvm"
+        size    = 50
+        format  = "qcow2"
+        import_from = var.debian_iso
       }
     }
   }
@@ -275,7 +260,7 @@ resource "proxmox_vm_qemu" "prod_vms" {
   vmid   = 2000 + index(sort(keys(local.prod_vms)), each.key)
   memory = 4096
 
-  boot = "order=ide2;scsi0"
+  boot = "order=scsi0"
 
   agent = 1
 
@@ -284,20 +269,12 @@ resource "proxmox_vm_qemu" "prod_vms" {
   }
 
   disks {
-    ide {
-      ide2 {
-        cdrom {
-          iso = var.debian_iso
-        }
-      }
-    }
-    scsi {
-      scsi0 {
-        disk {
-          storage = "local-lvm"
-          size    = 50
-          format  = "raw"
-        }
+    scsi0 {
+      disk {
+        storage = "local-lvm"
+        size    = 50
+        format  = "qcow2"
+        import_from = var.debian_iso
       }
     }
   }
@@ -327,7 +304,7 @@ resource "proxmox_vm_qemu" "infra_vms" {
   vmid   = 3000 + index(sort(keys(local.infra_vms)), each.key)
   memory = 4096
 
-  boot = "order=ide2;scsi0"
+  boot = "order=scsi0"
 
   agent = 1
 
@@ -336,20 +313,12 @@ resource "proxmox_vm_qemu" "infra_vms" {
   }
 
   disks {
-    ide {
-      ide2 {
-        cdrom {
-          iso = var.debian_iso
-        }
-      }
-    }
-    scsi {
-      scsi0 {
-        disk {
-          storage = "local-lvm"
-          size    = 50
-          format  = "raw"
-        }
+    scsi0 {
+      disk {
+        storage = "local-lvm"
+        size    = 50
+        format  = "qcow2"
+        import_from = var.debian_iso
       }
     }
   }
