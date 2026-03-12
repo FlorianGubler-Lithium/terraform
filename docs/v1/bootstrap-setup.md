@@ -39,7 +39,7 @@ The bootstrap phase starts with a minimum of 2 physical machines. One will be th
     3. Click "Add"
 12. Assign the "terraform" user to the "PVEAdmin" role
     1. Go to Datacenter → Permissions → Add -> User Permission
-    2. Select the "terraform" user, set the path to "/" and select the "PVEAdmin" role
+    2. Select the "terraform" user, set the path to "/" and select the "Administrator" role
     3. Click "Add"
 13. Create an API token for the terraform user
     1. Go to Datacenter → Permissions → API Tokens → Add
