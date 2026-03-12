@@ -148,7 +148,8 @@ resource "proxmox_vm_qemu" "firewall" {
 
   # Pass cloud-init data as base64
   provisioner "local-exec" {
-    command = "echo '${local.firewall_cloud_init}' | base64 -d > /tmp/firewall-user-data.yaml"
+    command = "mkdir -p /mnt/pve/local/snippets && echo '${local.firewall_cloud_init}'  | base64 -d > /mnt/pve/local/snippets/firewall-user-data.yaml"
+
   }
 
 }
@@ -260,7 +261,7 @@ resource "proxmox_vm_qemu" "dev_vms" {
 
   # Pass cloud-init data as base64
   provisioner "local-exec" {
-    command = "echo '${local.dev_cloud_init[each.key]}' | base64 -d > /tmp/${each.key}-user-data.yaml"
+    command = "mkdir -p /mnt/pve/local/snippets && echo '${local.dev_cloud_init[each.key]}' | base64 -d > /mnt/pve/local/snippets/${each.key}-user-data.yaml"
   }
 
 }
@@ -364,7 +365,7 @@ resource "proxmox_vm_qemu" "infra_vms" {
 
   # Pass cloud-init data as base64
   provisioner "local-exec" {
-    command = "echo '${local.infra_cloud_init[each.key]}' | base64 -d > /tmp/${each.key}-user-data.yaml"
+    command = "mkdir -p /mnt/pve/local/snippets && echo '${local.infra_cloud_init[each.key]}' | base64 -d > /mnt/pve/local/snippets/${each.key}-user-data.yaml"
   }
 
 }
