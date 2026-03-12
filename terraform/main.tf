@@ -126,21 +126,21 @@ resource "proxmox_vm_qemu" "firewall" {
   # Dev zone interface
   network {
     id    = 1
-    vnet  = "devzone"
+    vnet  = "dev"
     model = "virtio"
   }
 
   # Prod zone interface
   network {
     id    = 2
-    vnet  = "prodzone"
+    vnet  = "prod"
     model = "virtio"
   }
 
   # Infra zone interface
   network {
     id    = 3
-    vnet  = "infrazone"
+    vnet  = "infra"
     model = "virtio"
   }
 
@@ -253,7 +253,7 @@ resource "proxmox_vm_qemu" "dev_vms" {
   network {
     id    = 0
     model = "virtio"
-    vnet  = "devzone"
+    vnet  = "dev"
   }
 
   cicustom = "user=local:snippets/${each.key}-user-data.yaml"
@@ -305,7 +305,7 @@ resource "proxmox_vm_qemu" "prod_vms" {
   network {
     id    = 0
     model = "virtio"
-    vnet  = "prodzone"
+    vnet  = "prod"
   }
 
   cicustom = "user=local:snippets/${each.key}-user-data.yaml"
@@ -357,7 +357,7 @@ resource "proxmox_vm_qemu" "infra_vms" {
   network {
     id    = 0
     model = "virtio"
-    vnet  = "infrazone"
+    vnet  = "infra"
   }
 
   cicustom = "user=local:snippets/${each.key}-user-data.yaml"
