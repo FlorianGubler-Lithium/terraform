@@ -9,7 +9,7 @@ terraform {
 
 provider "proxmox" {
   pm_api_url          = var.pm_api_url
-  pm_api_token_id     = "terraform@pve!terraform-access"
+  pm_api_token_id     = "terraform@pam!terraform-access"
   pm_api_token_secret = var.pm_api_token_secret
   pm_tls_insecure     = true
 }
