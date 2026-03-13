@@ -15,7 +15,7 @@ provider "proxmox" {
   # Note: ssh agent needs to have the proper keys loaded
   ssh {
     agent = true
-    username = root
+    username = "root"
   }
 }
 
