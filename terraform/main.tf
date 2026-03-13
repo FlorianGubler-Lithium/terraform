@@ -22,6 +22,9 @@ resource "proxmox_virtual_environment_download_file" "debian_cloud_image" {
   file_name = "debian-12-cloud.qcow2"
 }
 
+resource "proxmox_virtual_environment_sdn_applier" "finalizer" {
+}
+
 #########################
 # SDN Backend Zone (Datacenter Level)
 #########################
@@ -30,6 +33,10 @@ resource "proxmox_virtual_environment_sdn_zone_vlan" "backend" {
   id = "backend"
   bridge = "vmbr0"
   ipam = "pve"
+
+  depends_on = [
+    proxmox_virtual_environment_sdn_applier.finalizer
+  ]
 }
 
 #########################
@@ -41,7 +48,9 @@ resource "proxmox_virtual_environment_sdn_vnet" "dev" {
   id       = "dev"
   tag     = 100
 
-  depends_on = [proxmox_virtual_environment_sdn_zone_vlan.backend]
+  depends_on = [
+    proxmox_virtual_environment_sdn_applier.finalizer
+  ]
 }
 
 resource "proxmox_virtual_environment_sdn_vnet" "prod" {
@@ -49,7 +58,9 @@ resource "proxmox_virtual_environment_sdn_vnet" "prod" {
   id       = "prod"
   tag     = 200
 
-  depends_on = [proxmox_virtual_environment_sdn_zone_vlan.backend]
+  depends_on = [
+    proxmox_virtual_environment_sdn_applier.finalizer
+  ]
 }
 
 resource "proxmox_virtual_environment_sdn_vnet" "infra" {
@@ -57,7 +68,9 @@ resource "proxmox_virtual_environment_sdn_vnet" "infra" {
   id       = "infra"
   tag     = 300
 
-  depends_on = [proxmox_virtual_environment_sdn_zone_vlan.backend]
+  depends_on = [
+    proxmox_virtual_environment_sdn_applier.finalizer
+  ]
 }
 
 # SDN Applier - Applies SDN configuration changes
@@ -77,10 +90,6 @@ resource "proxmox_virtual_environment_sdn_applier" "sdn_applier" {
       proxmox_virtual_environment_sdn_vnet.infra,
     ]
   }
-}
-
-resource "proxmox_virtual_environment_sdn_applier" "finalizer" {
-  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
 
 #########################
@@ -169,6 +178,8 @@ resource "proxmox_virtual_environment_vm" "firewall" {
     bridge = "infra"
     model  = "virtio"
   }
+
+  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
 
 ############################
@@ -232,6 +243,7 @@ resource "proxmox_virtual_environment_vm" "dev_vms" {
     model  = "virtio"
   }
 
+  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
 
 resource "proxmox_virtual_environment_vm" "prod_vms" {
@@ -272,6 +284,7 @@ resource "proxmox_virtual_environment_vm" "prod_vms" {
     model  = "virtio"
   }
 
+  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
 
 resource "proxmox_virtual_environment_vm" "infra_vms" {
@@ -312,6 +325,7 @@ resource "proxmox_virtual_environment_vm" "infra_vms" {
     model  = "virtio"
   }
 
+  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
 
 #########################
