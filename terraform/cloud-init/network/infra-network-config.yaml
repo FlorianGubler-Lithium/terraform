@@ -7,4 +7,3 @@ ethernets:
     dhcp4-overrides:
       use-dns: true
       use-ntp: true
-
