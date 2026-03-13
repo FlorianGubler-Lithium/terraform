@@ -30,10 +30,6 @@ resource "proxmox_virtual_environment_sdn_zone_vlan" "backend" {
   id = "backend"
   bridge = "vmbr0"
   ipam = "pve"
-
-  depends_on = [
-    proxmox_virtual_environment_sdn_applier.finalizer
-  ]
 }
 
 #########################
