@@ -102,6 +102,29 @@ resource "proxmox_virtual_environment_download_file" "debian_cloud_image" {
   file_name = "debian-13-cloud.qcow2"
 }
 
+############################
+# VM Definitions
+############################
+
+locals {
+
+  dev_vms = {
+    kube-dev-master-001 = { role = "master" }
+    kube-dev-worker-001 = { role = "worker" }
+  }
+
+  prod_vms = {
+    kube-prod-master-001 = { role = "master" }
+    kube-prod-worker-001 = { role = "worker" }
+  }
+
+  infra_vms = {
+    jump-001 = { role = "jump" }
+    proxy-001 = { role = "proxy" }
+    mgmt-001 = { role = "mgmt" }
+  }
+}
+
 #########################
 # Cloud-init Templates with Variable Substitution
 #########################
@@ -248,28 +271,6 @@ resource "proxmox_virtual_environment_vm" "firewall" {
   depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
 
-############################
-# VM Definitions
-############################
-#
-# locals {
-#
-#   dev_vms = {
-#     kube-dev-master-001 = { role = "master" }
-#     kube-dev-worker-001 = { role = "worker" }
-#   }
-#
-#   prod_vms = {
-#     kube-prod-master-001 = { role = "master" }
-#     kube-prod-worker-001 = { role = "worker" }
-#   }
-#
-#   infra_vms = {
-#     jump-001 = { role = "jump" }
-#     proxy-001 = { role = "proxy" }
-#     mgmt-001 = { role = "mgmt" }
-#   }
-# }
 #
 # resource "proxmox_virtual_environment_vm" "dev_vms" {
 #
