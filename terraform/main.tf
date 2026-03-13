@@ -23,52 +23,74 @@ resource "proxmox_virtual_environment_download_file" "debian_cloud_image" {
 }
 
 #########################
-# Network Zones (VLAN)
+# SDN Backend Zone (Datacenter Level)
 #########################
 
-locals {
+resource "proxmox_virtual_environment_sdn_zone_vlan" "backend" {
+  id = "backend"
+  bridge = "vmbr0"
+  ipam = "pve"
 
-  zones = {
-    devzone = {
-      vlan = 100
-      subnet = "10.10.0.0/24"
-      gateway = "10.10.0.1"
-    }
-
-    prodzone = {
-      vlan = 200
-      subnet = "10.20.0.0/24"
-      gateway = "10.20.0.1"
-    }
-
-    infrazone = {
-      vlan = 300
-      subnet = "10.30.0.0/24"
-      gateway = "10.30.0.1"
-    }
-  }
-
+  depends_on = [
+    proxmox_virtual_environment_sdn_applier.finalizer
+  ]
 }
 
 #########################
-# VM IP Assignments
+# Virtual Networks (vnets) in Backend Zone
 #########################
 
-locals {
-  vm_ips = {
-    # Dev zone VMs (starting at 10.10.0.10)
-    "kube-dev-master-001" = "10.10.0.10"
-    "kube-dev-worker-001" = "10.10.0.11"
+resource "proxmox_virtual_environment_sdn_vnet" "dev" {
+  zone       = proxmox_virtual_environment_sdn_zone_vlan.backend.id
+  id       = "dev"
+  vlanid     = 100
 
-    # Prod zone VMs (starting at 10.20.0.10)
-    "kube-prod-master-001" = "10.20.0.10"
-    "kube-prod-worker-001" = "10.20.0.11"
+  comment = "Development Virtual Network"
 
-    # Infra zone VMs (starting at 10.30.0.10)
-    "jump-001" = "10.30.0.10"
-    "proxy-001" = "10.30.0.11"
-    "mgmt-001" = "10.30.0.12"
+  depends_on = [proxmox_virtual_environment_sdn_zone_vlan.backend]
+}
+
+resource "proxmox_virtual_environment_sdn_vnet" "prod" {
+  zone       = proxmox_virtual_environment_sdn_zone_vlan.backend.id
+  id       = "prod"
+  vlanid     = 200
+
+  comment = "Production Virtual Network"
+
+  depends_on = [proxmox_virtual_environment_sdn_zone_vlan.backend]
+}
+
+resource "proxmox_virtual_environment_sdn_vnet" "infra" {
+  zone       = proxmox_virtual_environment_sdn_zone_vlan.backend.id
+  id       = "infra"
+  vlanid     = 300
+
+  comment = "Infrastructure Virtual Network"
+
+  depends_on = [proxmox_virtual_environment_sdn_zone_vlan.backend]
+}
+
+# SDN Applier - Applies SDN configuration changes
+resource "proxmox_virtual_environment_sdn_applier" "sdn_applier" {
+  depends_on = [
+    proxmox_virtual_environment_sdn_zone_vlan.backend,
+    proxmox_virtual_environment_sdn_vnet.dev,
+    proxmox_virtual_environment_sdn_vnet.prod,
+    proxmox_virtual_environment_sdn_vnet.infra,
+  ]
+
+  lifecycle {
+    replace_triggered_by = [
+      proxmox_virtual_environment_sdn_zone_vlan.backend,
+      proxmox_virtual_environment_sdn_vnet.dev,
+      proxmox_virtual_environment_sdn_vnet.prod,
+      proxmox_virtual_environment_sdn_vnet.infra,
+    ]
   }
+}
+
+resource "proxmox_virtual_environment_sdn_applier" "finalizer" {
+  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
 
 #########################
@@ -166,19 +188,19 @@ resource "proxmox_virtual_environment_vm" "firewall" {
 locals {
 
   dev_vms = {
-    kube-dev-master-001 = { zone = "devzone", role = "master" }
-    kube-dev-worker-001 = { zone = "devzone", role = "worker" }
+    kube-dev-master-001 = { role = "master" }
+    kube-dev-worker-001 = { role = "worker" }
   }
 
   prod_vms = {
-    kube-prod-master-001 = { zone = "prodzone", role = "master" }
-    kube-prod-worker-001 = { zone = "prodzone", role = "worker" }
+    kube-prod-master-001 = { role = "master" }
+    kube-prod-worker-001 = { role = "worker" }
   }
 
   infra_vms = {
-    jump-001 = { zone = "infrazone", role = "jump" }
-    proxy-001 = { zone = "infrazone", role = "proxy" }
-    mgmt-001 = { zone = "infrazone", role = "mgmt" }
+    jump-001 = { role = "jump" }
+    proxy-001 = { role = "proxy" }
+    mgmt-001 = { role = "mgmt" }
   }
 }
 

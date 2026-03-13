@@ -3,12 +3,6 @@ variable "pm_api_url" {
   description = "Proxmox API URL"
 }
 
-variable "pm_api_token_id" {
-  type        = string
-  description = "Proxmox API token ID (e.g., terraform@pam!terraform-access)"
-  default     = "terraform@pam!terraform-access"
-}
-
 variable "pm_api_token_secret" {
   type        = string
   sensitive   = true
@@ -18,11 +12,6 @@ variable "pm_api_token_secret" {
 variable "pm_node" {
   description = "Target Proxmox node"
   type        = string
-}
-
-variable "debian_iso" {
-  type        = string
-  description = "Path to Debian ISO in Proxmox storage (e.g., local:iso/debian-12-generic-amd64-netinst.iso)"
 }
 
 variable "vm_password" {
