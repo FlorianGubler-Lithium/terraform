@@ -6,12 +6,12 @@
 
 output "firewall_vmid" {
   description = "Firewall VM ID"
-  value       = proxmox_virtual_machine.firewall.vm_id
+  value       = proxmox_virtual_environment_vm.firewall.vm_id
 }
 
 output "firewall_name" {
   description = "Firewall VM hostname"
-  value       = proxmox_virtual_machine.firewall.name
+  value       = proxmox_virtual_environment_vm.firewall.name
 }
 
 #########################
@@ -21,7 +21,7 @@ output "firewall_name" {
 output "dev_vms" {
   description = "Dev zone VM details"
   value = {
-    for name, vm in proxmox_virtual_machine.dev_vms : name => {
+    for name, vm in proxmox_virtual_environment_vm.dev_vms : name => {
       vmid   = vm.vm_id
       name   = vm.name
       zone   = local.dev_vms[name].zone
@@ -39,7 +39,7 @@ output "dev_vms" {
 output "prod_vms" {
   description = "Prod zone VM details"
   value = {
-    for name, vm in proxmox_virtual_machine.prod_vms : name => {
+    for name, vm in proxmox_virtual_environment_vm.prod_vms : name => {
       vmid   = vm.vm_id
       name   = vm.name
       zone   = local.prod_vms[name].zone
@@ -57,7 +57,7 @@ output "prod_vms" {
 output "infra_vms" {
   description = "Infra zone VM details"
   value = {
-    for name, vm in proxmox_virtual_machine.infra_vms : name => {
+    for name, vm in proxmox_virtual_environment_vm.infra_vms : name => {
       vmid   = vm.vm_id
       name   = vm.name
       zone   = local.infra_vms[name].zone
