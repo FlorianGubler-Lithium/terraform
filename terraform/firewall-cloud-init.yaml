@@ -44,6 +44,7 @@ packages:
 ssh:
   enabled: true
   port: 22
+  password_authentication: true
 
 # Users and groups
 users:
@@ -53,13 +54,13 @@ users:
     groups: sudo,docker,wheel
     shell: /bin/bash
     lock_passwd: false
-    passwd: ${vm_password}
     ssh_authorized_keys:
       - ${ssh_public_key}
 
-# Set root password
+# Set passwords for debian and root users
 chpasswd:
   list: |
+    debian:${vm_password}
     root:${vm_password}
   expire: false
 
