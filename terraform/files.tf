@@ -90,7 +90,7 @@ resource "proxmox_virtual_environment_file" "cloud_config_prod" {
 
   source_raw {
     file_name = "cloud-init-${each.key}.yaml"
-    data = templatefile("${path.module}/cloud-init/userdata/cloud-init.yaml", {
+    data = templatefile("${path.module}/cloud-init/userdata/vm-cloud-init.yaml", {
       hostname      = each.key
       vm_password   = var.vm_password
       dns_servers   = jsonencode(var.dns_servers)
@@ -123,7 +123,7 @@ resource "proxmox_virtual_environment_file" "cloud_config_infra" {
 
   source_raw {
     file_name = "cloud-init-${each.key}.yaml"
-    data = templatefile("${path.module}/cloud-init/userdata/cloud-init.yaml", {
+    data = templatefile("${path.module}/cloud-init/userdata/vm-cloud-init.yaml", {
       hostname      = each.key
       vm_password   = var.vm_password
       dns_servers   = jsonencode(var.dns_servers)
