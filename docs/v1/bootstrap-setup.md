@@ -46,6 +46,9 @@ The bootstrap phase starts with a minimum of 2 physical machines. One will be th
     2. Set the token ID to "terraform-access"
     3. Click "Add"
     4. Copy the generated token value, you will need it for the Terraform configuration
+14. Configure the local storage to allow snippets
+    1. Go to Datacenter → Storage → local → Edit
+    2. Check the "Snippets" content type and click "Save"
 
 ## Setting Up the Management Host
 The management host is an external machine which is only needed in the bootstrap phase for the initial setup. This can be a laptop or raspberry pi. 
@@ -57,6 +60,7 @@ The management host is an external machine which is only needed in the bootstrap
       1. Or just run ```apt install ansible -y``` on Debian-based systems
    3. Git: https://git-scm.com/downloads
 3. Clone the following repository: https://github.com/FlorianGubler-Lithium/lithium-infra
+4. Configure your local SSH agent to allow connecting to the proxmox host
 
 ## Bootstrapping the Infrastructure
 ### Terraform Initialization

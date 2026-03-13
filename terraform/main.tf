@@ -11,6 +11,12 @@ provider "proxmox" {
   endpoint = var.pm_api_url
   api_token = "terraform@pam!terraform-access=${var.pm_api_token_secret}"
   insecure = true
+
+  # Note: ssh agent needs to have the proper keys loaded
+  ssh {
+    agent = true
+    username = root
+  }
 }
 
 resource "proxmox_virtual_environment_sdn_applier" "finalizer" {
