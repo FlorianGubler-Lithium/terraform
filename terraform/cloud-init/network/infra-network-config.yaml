@@ -2,7 +2,7 @@ version: 2
 renderer: networkd
 ethernets:
   # Infra zone interface (10.30.0.x/24)
-  eth0:
+  ens18:
     dhcp4: true
     dhcp4-overrides:
       use-dns: true
