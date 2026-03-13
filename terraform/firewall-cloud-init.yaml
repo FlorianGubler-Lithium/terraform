@@ -67,31 +67,33 @@ chpasswd:
 # Network configuration with static IPs on all interfaces
 network:
   version: 2
+  renderer: networkd
   ethernets:
     # Management interface (DHCP) - ens18
     ens18:
       dhcp4: true
+      dhcp4-overrides:
+        use-dns: true
+        use-ntp: true
+      activate: true
     # Dev zone interface (10.10.0.1/24) - ens19
     ens19:
       addresses:
         - 10.10.0.1/24
       dhcp4: false
-      dhcp4-overrides:
-        use-routes: false
+      activate: true
     # Prod zone interface (10.20.0.1/24) - ens20
     ens20:
       addresses:
         - 10.20.0.1/24
       dhcp4: false
-      dhcp4-overrides:
-        use-routes: false
+      activate: true
     # Infra zone interface (10.30.0.1/24) - ens21
     ens21:
       addresses:
         - 10.30.0.1/24
       dhcp4: false
-      dhcp4-overrides:
-        use-routes: false
+      activate: true
 
 # Configure DNS
 resolv_conf:
@@ -103,8 +105,10 @@ bootcmd:
   - echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
   - sysctl -p
 
-# Run commands to set up NAT rules
+# Run commands to set up NAT rules and apply network config
 runcmd:
+  - netplan apply
+  - sleep 2
   - iptables -t nat -A POSTROUTING -o ens18 -j MASQUERADE
   - iptables -A FORWARD -i ens19 -o ens18 -j ACCEPT
   - iptables -A FORWARD -i ens20 -o ens18 -j ACCEPT

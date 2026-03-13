@@ -65,10 +65,15 @@ chpasswd:
 # Network configuration
 network:
   version: 2
+  renderer: networkd
   ethernets:
     # Primary interface (DHCP) - ens18
     ens18:
       dhcp4: true
+      dhcp4-overrides:
+        use-dns: true
+        use-ntp: true
+      activate: true
 
 # Configure DNS
 resolv_conf:
