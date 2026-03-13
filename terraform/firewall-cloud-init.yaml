@@ -88,7 +88,7 @@ network:
 
 # Configure DNS
 resolv_conf:
-  nameservers: [${dns_servers}]
+  nameservers: ${dns_servers}
   searchdomains: []
 
 # Boot commands for IP forwarding and NAT rules

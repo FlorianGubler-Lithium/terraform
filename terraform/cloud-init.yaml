@@ -1,7 +1,7 @@
 #cloud-config
 # Debian 12 cloud-init configuration for Kubernetes nodes
 
-hostname: {{ hostname }}
+hostname: ${hostname}
 manage_hostname: true
 preserve_hostname: false
 

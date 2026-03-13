@@ -103,9 +103,10 @@ resource "proxmox_virtual_environment_download_file" "debian_cloud_image" {
 }
 
 #########################
-# Cloud-init Templates
+# Cloud-init Templates with Variable Substitution
 #########################
 
+# Firewall cloud-init with hostname substitution
 resource "proxmox_virtual_environment_file" "cloud_config_firewall" {
   node_name = var.pm_node
   datastore_id = "local"
@@ -114,19 +115,72 @@ resource "proxmox_virtual_environment_file" "cloud_config_firewall" {
 
   source_raw {
     file_name = "firewall-cloud-init.yaml"
-    data = file("${path.module}/firewall-cloud-init.yaml")
+    data = templatefile("${path.module}/firewall-cloud-init.yaml", {
+      hostname      = "cluster-firewall"
+      vm_password   = var.vm_password
+      dns_servers   = jsonencode(var.dns_servers)
+      ssh_public_key = var.ssh_public_key
+    })
   }
 }
 
-resource "proxmox_virtual_environment_file" "cloud_config" {
+# Dev VMs cloud-init with per-VM hostname substitution
+resource "proxmox_virtual_environment_file" "cloud_config_dev" {
+  for_each = local.dev_vms
+
   node_name = var.pm_node
   datastore_id = "local"
 
   content_type = "snippets"
 
   source_raw {
-    file_name = "cloud-init.yaml"
-    data = file("${path.module}/cloud-init.yaml")
+    file_name = "cloud-init-${each.key}.yaml"
+    data = templatefile("${path.module}/cloud-init.yaml", {
+      hostname      = each.key
+      vm_password   = var.vm_password
+      dns_servers   = jsonencode(var.dns_servers)
+      ssh_public_key = var.ssh_public_key
+    })
+  }
+}
+
+# Prod VMs cloud-init with per-VM hostname substitution
+resource "proxmox_virtual_environment_file" "cloud_config_prod" {
+  for_each = local.prod_vms
+
+  node_name = var.pm_node
+  datastore_id = "local"
+
+  content_type = "snippets"
+
+  source_raw {
+    file_name = "cloud-init-${each.key}.yaml"
+    data = templatefile("${path.module}/cloud-init.yaml", {
+      hostname      = each.key
+      vm_password   = var.vm_password
+      dns_servers   = jsonencode(var.dns_servers)
+      ssh_public_key = var.ssh_public_key
+    })
+  }
+}
+
+# Infra VMs cloud-init with per-VM hostname substitution
+resource "proxmox_virtual_environment_file" "cloud_config_infra" {
+  for_each = local.infra_vms
+
+  node_name = var.pm_node
+  datastore_id = "local"
+
+  content_type = "snippets"
+
+  source_raw {
+    file_name = "cloud-init-${each.key}.yaml"
+    data = templatefile("${path.module}/cloud-init.yaml", {
+      hostname      = each.key
+      vm_password   = var.vm_password
+      dns_servers   = jsonencode(var.dns_servers)
+      ssh_public_key = var.ssh_public_key
+    })
   }
 }
 
@@ -147,6 +201,8 @@ resource "proxmox_virtual_environment_vm" "firewall" {
   initialization {
     user_data_file_id = proxmox_virtual_environment_file.cloud_config_firewall.id
   }
+
+  keyboard_layout = "de-ch"
 
   boot_order = ["ide2", "scsi0"]
 
@@ -228,7 +284,7 @@ resource "proxmox_virtual_environment_vm" "dev_vms" {
   }
 
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config_dev[each.key].id
   }
 
   boot_order = ["ide2", "scsi0"]
@@ -269,7 +325,7 @@ resource "proxmox_virtual_environment_vm" "prod_vms" {
   }
 
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config_prod[each.key].id
   }
 
   boot_order = ["ide2", "scsi0"]
@@ -310,7 +366,7 @@ resource "proxmox_virtual_environment_vm" "infra_vms" {
   }
 
   initialization {
-    user_data_file_id = proxmox_virtual_environment_file.cloud_config.id
+    user_data_file_id = proxmox_virtual_environment_file.cloud_config_infra[each.key].id
   }
 
   boot_order = ["ide2", "scsi0"]
