@@ -46,25 +46,21 @@ network:
       dhcp4-overrides:
         use-dns: true
         use-ntp: true
-      activate: true
     # Dev zone interface (10.10.0.1/24) - ens19
     ens19:
       addresses:
         - 10.10.0.1/24
       dhcp4: false
-      activate: true
     # Prod zone interface (10.20.0.1/24) - ens20
     ens20:
       addresses:
         - 10.20.0.1/24
       dhcp4: false
-      activate: true
     # Infra zone interface (10.30.0.1/24) - ens21
     ens21:
       addresses:
         - 10.30.0.1/24
       dhcp4: false
-      activate: true
 
 # Configure DNS
 resolv_conf:
