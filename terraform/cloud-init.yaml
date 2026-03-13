@@ -66,7 +66,8 @@ chpasswd:
 network:
   version: 2
   ethernets:
-    eth0:
+    # Primary interface (DHCP) - ens18
+    ens18:
       dhcp4: true
 
 # Configure DNS

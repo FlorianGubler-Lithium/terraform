@@ -287,6 +287,8 @@ resource "proxmox_virtual_environment_vm" "dev_vms" {
     user_data_file_id = proxmox_virtual_environment_file.cloud_config_dev[each.key].id
   }
 
+  keyboard_layout = "de-ch"
+
   boot_order = ["ide2", "scsi0"]
 
   agent {
@@ -328,6 +330,8 @@ resource "proxmox_virtual_environment_vm" "prod_vms" {
     user_data_file_id = proxmox_virtual_environment_file.cloud_config_prod[each.key].id
   }
 
+  keyboard_layout = "de-ch"
+
   boot_order = ["ide2", "scsi0"]
 
   agent {
@@ -368,6 +372,8 @@ resource "proxmox_virtual_environment_vm" "infra_vms" {
   initialization {
     user_data_file_id = proxmox_virtual_environment_file.cloud_config_infra[each.key].id
   }
+
+  keyboard_layout = "de-ch"
 
   boot_order = ["ide2", "scsi0"]
 

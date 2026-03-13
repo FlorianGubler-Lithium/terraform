@@ -68,24 +68,30 @@ chpasswd:
 network:
   version: 2
   ethernets:
-    # Management interface (DHCP)
-    eth0:
+    # Management interface (DHCP) - ens18
+    ens18:
       dhcp4: true
-    # Dev zone interface (10.10.0.1/24)
-    eth1:
+    # Dev zone interface (10.10.0.1/24) - ens19
+    ens19:
       addresses:
         - 10.10.0.1/24
       dhcp4: false
-    # Prod zone interface (10.20.0.1/24)
-    eth2:
+      dhcp4-overrides:
+        use-routes: false
+    # Prod zone interface (10.20.0.1/24) - ens20
+    ens20:
       addresses:
         - 10.20.0.1/24
       dhcp4: false
-    # Infra zone interface (10.30.0.1/24)
-    eth3:
+      dhcp4-overrides:
+        use-routes: false
+    # Infra zone interface (10.30.0.1/24) - ens21
+    ens21:
       addresses:
         - 10.30.0.1/24
       dhcp4: false
+      dhcp4-overrides:
+        use-routes: false
 
 # Configure DNS
 resolv_conf:
@@ -99,13 +105,13 @@ bootcmd:
 
 # Run commands to set up NAT rules
 runcmd:
-  - iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-  - iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
-  - iptables -A FORWARD -i eth2 -o eth0 -j ACCEPT
-  - iptables -A FORWARD -i eth3 -o eth0 -j ACCEPT
-  - iptables -A FORWARD -i eth0 -o eth1 -m state --state RELATED,ESTABLISHED -j ACCEPT
-  - iptables -A FORWARD -i eth0 -o eth2 -m state --state RELATED,ESTABLISHED -j ACCEPT
-  - iptables -A FORWARD -i eth0 -o eth3 -m state --state RELATED,ESTABLISHED -j ACCEPT
+  - iptables -t nat -A POSTROUTING -o ens18 -j MASQUERADE
+  - iptables -A FORWARD -i ens19 -o ens18 -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens18 -j ACCEPT
+  - iptables -A FORWARD -i ens21 -o ens18 -j ACCEPT
+  - iptables -A FORWARD -i ens18 -o ens19 -m state --state RELATED,ESTABLISHED -j ACCEPT
+  - iptables -A FORWARD -i ens18 -o ens20 -m state --state RELATED,ESTABLISHED -j ACCEPT
+  - iptables -A FORWARD -i ens18 -o ens21 -m state --state RELATED,ESTABLISHED -j ACCEPT
   - netfilter-persistent save
 
 # Final message
