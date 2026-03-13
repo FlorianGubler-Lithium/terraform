@@ -2,11 +2,10 @@
 # Debian 12 cloud-init configuration for Firewall Router
 
 hostname: ${hostname}
-manage_hostname: true
 preserve_hostname: false
 
 # Set timezone
-timezone: UTC
+timezone: Europe/Zurich
 
 # Update system
 apt:
@@ -17,34 +16,6 @@ apt:
   security:
     - arches: [amd64, i386]
       uri: "http://security.debian.org/debian-security"
-
-package_update: true
-package_upgrade: true
-package_reboot_if_required: true
-
-# Install required packages
-packages:
-  - curl
-  - wget
-  - git
-  - vim
-  - htop
-  - net-tools
-  - jq
-  - unzip
-  - openssh-server
-  - openssh-client
-  - ca-certificates
-  - gnupg
-  - apt-transport-https
-  - iptables-persistent
-  - nftables
-
-# Configure SSH
-ssh:
-  enabled: true
-  port: 22
-  password_authentication: true
 
 # Users and groups
 users:
@@ -99,6 +70,34 @@ network:
 resolv_conf:
   nameservers: ${dns_servers}
   searchdomains: []
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+# Install required packages
+packages:
+  - curl
+  - wget
+  - git
+  - vim
+  - htop
+  - net-tools
+  - jq
+  - unzip
+  - openssh-server
+  - openssh-client
+  - ca-certificates
+  - gnupg
+  - apt-transport-https
+  - iptables-persistent
+  - nftables
+
+# Configure SSH
+ssh:
+  enabled: true
+  port: 22
+  password_authentication: true
 
 # Boot commands for IP forwarding and NAT rules
 bootcmd:
