@@ -85,12 +85,12 @@ output "inventory" {
   description = "Ansible inventory in INI format"
   value = templatefile("${path.module}/inventory.tpl", {
     firewall = {
-      vmid = proxmox_virtual_machine.firewall.vm_id
-      name = proxmox_virtual_machine.firewall.name
+      vmid = proxmox_virtual_environment_vm.firewall.vm_id
+      name = proxmox_virtual_environment_vm.firewall.name
     }
-    dev_vms  = { for name, vm in proxmox_virtual_machine.dev_vms : name => { vmid = vm.vm_id, role = local.dev_vms[name].role } }
-    prod_vms = { for name, vm in proxmox_virtual_machine.prod_vms : name => { vmid = vm.vm_id, role = local.prod_vms[name].role } }
-    infra_vms = { for name, vm in proxmox_virtual_machine.infra_vms : name => { vmid = vm.vm_id, role = local.infra_vms[name].role } }
+    dev_vms  = { for name, vm in proxmox_virtual_environment_vm.dev_vms : name => { vmid = vm.vm_id, role = local.dev_vms[name].role } }
+    prod_vms = { for name, vm in proxmox_virtual_environment_vm.prod_vms : name => { vmid = vm.vm_id, role = local.prod_vms[name].role } }
+    infra_vms = { for name, vm in proxmox_virtual_environment_vm.infra_vms : name => { vmid = vm.vm_id, role = local.infra_vms[name].role } }
   })
 }
 
