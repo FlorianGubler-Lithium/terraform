@@ -1,55 +1,28 @@
 variable "pm_node" {}
-variable "vm_password" { sensitive = true }
-variable "ssh_public_key" { sensitive = true }
-variable "dns_servers" {}
+variable "user_data_file_base" {}
+variable "network_data_file_base" {}
 variable "debian_cloud_image_id" {}
 variable "sdn_applier" {}
 
-resource "proxmox_virtual_environment_file" "user_config" {
-  node_name    = var.pm_node
-  datastore_id = "local"
-  content_type = "snippets"
-
-  source_raw {
-    file_name = "mgmt-prod-001-cloud-init.yaml"
-    data = templatefile("${path.module}/userdata.yaml", {
-      hostname       = "mgmt-prod-001"
-      vm_password    = var.vm_password
-      dns_servers    = jsonencode(var.dns_servers)
-      ssh_public_key = var.ssh_public_key
-    })
-  }
-
-  depends_on = [var.sdn_applier]
-}
-
-resource "proxmox_virtual_environment_file" "network_config" {
-  node_name    = var.pm_node
-  datastore_id = "local"
-  content_type = "snippets"
-
-  source_raw {
-    file_name = "mgmt-prod-001-network.yaml"
-    data      = file("${path.module}/network.yaml")
-  }
-
-  depends_on = [var.sdn_applier]
+locals {
+  vm_name = basename(path.module)
 }
 
 resource "proxmox_virtual_environment_vm" "vm" {
-  name      = "mgmt-prod-001"
+  name      = "${local.vm_name}"
   node_name = var.pm_node
   vm_id     = 2003
 
   memory { dedicated = 4096 }
 
   initialization {
-    user_data_file_id    = proxmox_virtual_environment_file.user_config.id
-    network_data_file_id = proxmox_virtual_environment_file.network_config.id
+    user_data_file_id    = var.user_data_file_base["${local.vm_name}"].id
+    network_data_file_id = var.network_data_file_base["${local.vm_name}"].id
   }
 
   keyboard_layout = "de-ch"
   boot_order      = ["ide2", "scsi0"]
+
   agent { enabled = true }
   cpu { cores = 2 }
 
