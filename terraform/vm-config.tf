@@ -52,6 +52,6 @@ resource "proxmox_virtual_environment_file" "cloud_network_config" {
 
   source_raw {
     file_name = "${each.key}-network-config.yaml"
-    data      = file("${path.module}/vm-config/${each.key}/network.yaml.tftpl")
+    data      = templatefile("${path.module}/vm-config/${each.key}/network.yaml.tftpl", {})
   }
 }

@@ -10,8 +10,6 @@ module "proxy_001" {
   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["proxy-001"].id
   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["proxy-001"].id
-
-  depends_on = [proxmox_virtual_environment_file.cloud_user_config, proxmox_virtual_environment_file.cloud_network_config]
 }
 
 ############################
