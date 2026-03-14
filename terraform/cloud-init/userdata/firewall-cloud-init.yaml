@@ -28,12 +28,9 @@ users:
     plain_text_passwd: "${vm_password}"
     ssh_authorized_keys:
       - ${ssh_public_key}
-
-# Set passwords for debian and root users
-chpasswd:
-  list: |
-    root:${vm_password}
-  expire: false
+  - name: root
+    lock_passwd: false
+    plain_text_passwd: "${vm_password}"
 
 # Configure DNS
 resolv_conf:
@@ -65,9 +62,7 @@ packages:
 
 # Configure SSH
 ssh:
-  enabled: true
-  port: 22
-  password_authentication: true
+  emit_keys_to_console: false
 
 # Boot commands for IP forwarding and NAT rules
 bootcmd:
