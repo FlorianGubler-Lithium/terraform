@@ -6,10 +6,26 @@ terraform {
   }
 }
 
-variable "pm_node" {}
-variable "user_data_file_base" {}
-variable "network_data_file_base" {}
-variable "debian_cloud_image_id" {}
+variable "pm_node" {
+  type = string
+}
+
+variable "user_data_file_base" {
+  type = map(object({
+    id = string
+  }))
+}
+
+variable "network_data_file_base" {
+  type = map(object({
+    id = string
+  }))
+}
+
+variable "debian_cloud_image_id" {
+  type = string
+}
+
 variable "sdn_applier" {}
 
 locals {
