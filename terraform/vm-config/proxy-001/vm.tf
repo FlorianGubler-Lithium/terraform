@@ -17,15 +17,15 @@ locals {
 }
 
 resource "proxmox_virtual_environment_vm" "vm" {
-  name      = "${local.vm_name}"
+  name      = local.vm_name
   node_name = var.pm_node
   vm_id     = 3011
 
   memory { dedicated = 4096 }
 
   initialization {
-    user_data_file_id    = var.user_data_file_base["${local.vm_name}"].id
-    network_data_file_id = var.network_data_file_base["${local.vm_name}"].id
+    user_data_file_id    = var.user_data_file_base[local.vm_name].id
+    network_data_file_id = var.network_data_file_base[local.vm_name].id
   }
 
   keyboard_layout = "de-ch"

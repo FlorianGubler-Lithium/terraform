@@ -7,10 +7,10 @@ module "proxy_001" {
 
   pm_node               = var.pm_node
   vm_password           = var.vm_password
-  ssh_public_key        = var.ssh_public_key
-  dns_servers           = var.dns_servers
   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+  user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+  network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 }
 
 ############################
@@ -22,10 +22,12 @@ module "firewall_001" {
 
   pm_node               = var.pm_node
   vm_password           = var.vm_password
-  ssh_public_key        = var.ssh_public_key
-  dns_servers           = var.dns_servers
   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+  user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+  network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
+
+  depends_on = [module.proxy_001]
 }
 
 # ############################
@@ -37,12 +39,12 @@ module "firewall_001" {
 #
 #   pm_node               = var.pm_node
 #   vm_password           = var.vm_password
-#   ssh_public_key        = var.ssh_public_key
-#   dns_servers           = var.dns_servers
 #   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
 #   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+#   user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+#   network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 #
-#   depends_on = [module.firewall_001]
+#   depends_on = [module.proxy_001]
 # }
 #
 # ############################
@@ -54,10 +56,10 @@ module "firewall_001" {
 #
 #   pm_node               = var.pm_node
 #   vm_password           = var.vm_password
-#   ssh_public_key        = var.ssh_public_key
-#   dns_servers           = var.dns_servers
 #   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
 #   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+#   user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+#   network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 #
 #   depends_on = [module.firewall_001]
 # }
@@ -71,12 +73,12 @@ module "firewall_001" {
 #
 #   pm_node               = var.pm_node
 #   vm_password           = var.vm_password
-#   ssh_public_key        = var.ssh_public_key
-#   dns_servers           = var.dns_servers
 #   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
 #   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+#   user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+#   network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 #
-#   depends_on = [module.kube_dev_master_001]
+#   depends_on = [module.firewall_001]
 # }
 #
 # ############################
@@ -88,12 +90,12 @@ module "firewall_001" {
 #
 #   pm_node               = var.pm_node
 #   vm_password           = var.vm_password
-#   ssh_public_key        = var.ssh_public_key
-#   dns_servers           = var.dns_servers
 #   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
 #   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+#   user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+#   network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 #
-#   depends_on = [module.kube_dev_master_001]
+#   depends_on = [module.firewall_001]
 # }
 #
 # ############################
@@ -105,10 +107,10 @@ module "firewall_001" {
 #
 #   pm_node               = var.pm_node
 #   vm_password           = var.vm_password
-#   ssh_public_key        = var.ssh_public_key
-#   dns_servers           = var.dns_servers
 #   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
 #   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+#   user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+#   network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 #
 #   depends_on = [module.firewall_001]
 # }
@@ -122,12 +124,12 @@ module "firewall_001" {
 #
 #   pm_node               = var.pm_node
 #   vm_password           = var.vm_password
-#   ssh_public_key        = var.ssh_public_key
-#   dns_servers           = var.dns_servers
 #   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
 #   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+#   user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+#   network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 #
-#   depends_on = [module.kube_prod_master_001]
+#   depends_on = [module.firewall_001]
 # }
 #
 # ############################
@@ -139,10 +141,10 @@ module "firewall_001" {
 #
 #   pm_node               = var.pm_node
 #   vm_password           = var.vm_password
-#   ssh_public_key        = var.ssh_public_key
-#   dns_servers           = var.dns_servers
 #   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
 #   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
+#   user_data_file_base = proxmox_virtual_environment_file.cloud_user_config
+#   network_data_file_base = proxmox_virtual_environment_file.cloud_network_config
 #
-#   depends_on = [module.kube_prod_master_001]
+#   depends_on = [module.firewall_001]
 # }
