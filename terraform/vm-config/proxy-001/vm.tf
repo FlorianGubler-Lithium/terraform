@@ -1,3 +1,11 @@
+terraform {
+  required_providers {
+    proxmox = {
+      source = "bpg/proxmox"
+    }
+  }
+}
+
 variable "pm_node" {}
 variable "user_data_file_base" {}
 variable "network_data_file_base" {}
