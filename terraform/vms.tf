@@ -45,11 +45,10 @@ resource "proxmox_virtual_environment_vm" "all_vms" {
     }
   }
 
-  depends_on = concat(
-    [proxmox_virtual_environment_sdn_applier.sdn_applier],
-    # Explicit dependencies for specific VMs
-      each.key == "firewall-001" ? [proxmox_virtual_environment_vm.all_vms["proxy-001"]] : [],
-      each.key == "jump-001" ? [proxmox_virtual_environment_vm.all_vms["proxy-001"]] : []
-  )
+  depends_on = [
+    proxmox_virtual_environment_sdn_applier.sdn_applier,
+    for dep_name in each.value.depends_on_vms :
+    proxmox_virtual_environment_vm.all_vms[dep_name]
+  ]
 }
 
