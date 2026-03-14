@@ -11,15 +11,11 @@ variable "pm_node" {
 }
 
 variable "user_data_file_id" {
-  type = map(object({
-    id = string
-  }))
+  type = string
 }
 
 variable "network_data_file_id" {
-  type = map(object({
-    id = string
-  }))
+  type = string
 }
 
 variable "debian_cloud_image_id" {
