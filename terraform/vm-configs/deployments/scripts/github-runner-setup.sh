@@ -28,12 +28,13 @@ fi
 GITHUB_ORG="$1"
 GITHUB_TOKEN="$2"
 GITHUB_RUNNER_VERSION="$3"
-RUNNER_NAME="${4:-Default}"
+RUNNER_GROUP="${4:-Default}"
 RUNNER_NAME="${5:-github-runner-$(hostname)}"
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Starting GitHub Actions runner setup"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Organization: $GITHUB_ORG"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Runner name: $RUNNER_NAME"
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Runner group: $RUNNER_GROUP"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Runner Version: $GITHUB_RUNNER_VERSION"
 
 # Validate required arguments
