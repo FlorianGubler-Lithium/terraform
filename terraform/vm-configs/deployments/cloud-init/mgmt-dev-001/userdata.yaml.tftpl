@@ -72,7 +72,7 @@ runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
   - chmod +x /opt/github-runner-setup.sh
-  - /opt/github-runner-setup.sh "${github_runner_org}" "${github_runner_token}"
+  - /opt/github-runner-setup.sh '${extra_vars["github_runner_org"]}' '${extra_vars["github_runner_token"]}'
 
 # Final message
 final_message: "System booted successfully. Instance uptime: $UPTIME seconds"
