@@ -26,3 +26,18 @@ module "infra_vms" {
 
   depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
+
+############################
+# Deployments VM Module
+############################
+
+module "deployments_vms" {
+  source = "./vm-configs/deployments"
+
+  pm_node               = local.pm_node
+  vm_ci_base_image_file_id = proxmox_virtual_environment_download_file.vm_ci_base_image.id
+  vm_password = var.vm_password
+  ssh_public_key = var.ssh_public_key
+
+  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier, module.infra_vms]
+}

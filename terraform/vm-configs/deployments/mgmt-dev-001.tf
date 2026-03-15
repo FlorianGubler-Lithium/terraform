@@ -1,64 +1,18 @@
-terraform {
-  required_providers {
-    proxmox = {
-      source = "bpg/proxmox"
-    }
-  }
-}
+module "mgmt_dev" {
+  source = "../../modules/init_vm/"
 
-variable "pm_node" {
-  type = string
-}
-
-variable "user_data_file_id" {
-  type = string
-}
-
-variable "network_data_file_id" {
-  type = string
-}
-
-variable "debian_cloud_image_id" {
-  type = string
-}
-
-variable "sdn_applier" {}
-
-locals {
-  vm_name = basename(path.module)
-}
-
-resource "proxmox_virtual_environment_vm" "vm" {
-  name      = local.vm_name
-  node_name = var.pm_node
+  vm_name   = "mgmt-dev-001"
   vm_id     = 1003
+  vm_password = var.vm_password
+  vm_ci_userdata_file_path = "vm-configs/deployments/cloud-init/mgmt-dev-001/userdata.yaml.tftpl"
+  vm_ci_networkdata_file_path = "vm-configs/deployments/cloud-init/mgmt-dev-001/network.yaml.tftpl"
+  vm_ci_base_image_file_id = var.vm_ci_base_image_file_id
+  vm_memory = 4096
+  vm_cpu_cores = 2
+  vm_disk_size = 20
+  vm_network_devices = ["dev"]
+  ssh_public_key = var.ssh_public_key
 
-  memory { dedicated = 4096 }
-
-  initialization {
-    user_data_file_id    = var.user_data_file_id
-    network_data_file_id = var.network_data_file_id
-  }
-
-  keyboard_layout = "de-ch"
-  boot_order      = ["ide2", "scsi0"]
-
-  agent { enabled = true }
-  cpu { cores = 2 }
-
-  disk {
-    datastore_id = "local-lvm"
-    file_id      = var.debian_cloud_image_id
-    interface    = "scsi0"
-    size         = 20
-  }
-
-  network_device {
-    bridge = "dev"
-    model  = "virtio"
-  }
-
-  depends_on = [var.sdn_applier]
+  pm_node = var.pm_node
 }
 
-output "vm" { value = proxmox_virtual_environment_vm.vm }
