@@ -77,16 +77,21 @@ if [ ! -f "$RUNNER_FILE" ]; then
 fi
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Successfully downloaded GitHub Actions runner"
+RUNNER_INSTALL_DIR="/home/github-runner/github-runner"
+mkdir -p "$RUNNER_INSTALL_DIR"
 
 # Extract runner files
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Extracting runner files"
-chown github-runner:github-runner "$RUNNER_FILE"
-su - github-runner -c "$RUNNER_FILE"
+tar -xzf "$RUNNER_FILE" -C "$RUNNER_INSTALL_DIR"
+
+# Fix permissions for github-runner user
+chown -R github-runner:github-runner "$RUNNER_INSTALL_DIR"
+
 rm "$RUNNER_FILE"
 
 # Register the runner
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Registering runner with GitHub organization"
-su - github-runner -c "cd /home/github-runner && ./config.sh --url 'https://github.com/${GITHUB_ORG}' --token '${GITHUB_TOKEN}' --name '${RUNNER_NAME}' --runnergroup '${RUNNER_GROUP}' --work '_work' --replace --unattended"
+su - github-runner -c "cd $RUNNER_INSTALL_DIR && ./config.sh --url 'https://github.com/${GITHUB_ORG}' --token '${GITHUB_TOKEN}' --name '${RUNNER_NAME}' --runnergroup '${RUNNER_GROUP}' --work '_work' --replace --unattended"
 
 if [ $? -ne 0 ]; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Failed to register runner"
@@ -95,7 +100,7 @@ fi
 
 # Install and enable systemd service
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Installing systemd service"
-su - github-runner -c 'cd /home/github-runner && ./svc.sh install'
+su - github-runner -c "cd $RUNNER_INSTALL_DIR && ./svc.sh install"
 
 # Start the service
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Starting systemd service"
