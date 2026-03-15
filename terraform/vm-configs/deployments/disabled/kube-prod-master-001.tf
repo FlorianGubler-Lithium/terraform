@@ -1,5 +1,5 @@
 module "kube_prod_master" {
-  source = "../../modules/init_vm/"
+  source = "../../../modules/init_vm"
 
   vm_name   = "kube-prod-master-001"
   vm_id     = 2001

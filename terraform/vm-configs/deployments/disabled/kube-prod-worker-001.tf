@@ -1,5 +1,5 @@
 module "kube_prod_worker" {
-  source = "../../modules/init_vm/"
+  source = "../../../modules/init_vm"
 
   vm_name   = "kube-prod-worker-001"
   vm_id     = 2002

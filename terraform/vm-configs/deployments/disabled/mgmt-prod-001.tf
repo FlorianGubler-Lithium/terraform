@@ -1,5 +1,5 @@
 module "mgmt_prod" {
-  source = "../../modules/init_vm/"
+  source = "../../../modules/init_vm"
 
   vm_name   = "mgmt-prod-001"
   vm_id     = 2003
