@@ -4,7 +4,7 @@ locals {
   pm_node = "prx-001"
 
   # GitHub Runner Configuration
-  github_runner_org = ""
+  github_runner_org = "FlorianGubler-Lithium"
   github_runner_version = "v2.332.0"
 
   # Proxmox VM Configuration
