@@ -51,13 +51,22 @@ case "$ARCH" in
     *) echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Unsupported architecture: $ARCH"; exit 1 ;;
 esac
 
-
-echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Latest version: v$GITHUB_RUNNER_VERSION"
-
-DOWNLOAD_URL="https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-${DOWNLOAD_ARCH}-${GITHUB_RUNNER_VERSION}.tar.gz"
+DOWNLOAD_URL="https://github.com/actions/runner/releases/download/${GITHUB_RUNNER_VERSION}/actions-runner-linux-${DOWNLOAD_ARCH}-${GITHUB_RUNNER_VERSION}.tar.gz"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Download URL: $DOWNLOAD_URL"
 
-curl -L -O "$DOWNLOAD_URL"
+if ! curl -L -O "$DOWNLOAD_URL"; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Failed to download GitHub Actions runner from $DOWNLOAD_URL"
+    exit 1
+fi
+
+# Verify downloaded file exists
+RUNNER_FILE="actions-runner-linux-${DOWNLOAD_ARCH}-${GITHUB_RUNNER_VERSION}.tar.gz"
+if [ ! -f "$RUNNER_FILE" ]; then
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Downloaded file not found: $RUNNER_FILE"
+    exit 1
+fi
+
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Successfully downloaded GitHub Actions runner"
 
 # Extract runner files
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Extracting runner files"
