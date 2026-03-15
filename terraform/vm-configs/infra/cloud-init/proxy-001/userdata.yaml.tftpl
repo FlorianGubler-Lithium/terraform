@@ -84,7 +84,7 @@ write_files:
       acl k8s_repos dstdomain registry.k8s.io pkg.kubernetes.io storage.googleapis.com dl.k8s.io
 
       # Destination: GitHub Action Runner URLs
-      acl github_urls dstdomain github.com api.github.com github-releases.githubusercontent.com github-cloud.s3.amazonaws.com github-production-release-asset-*.s3.amazonaws.com
+      acl github_urls dstdomain github.com api.github.com github-releases.githubusercontent.com release-assets.githubusercontent.com github-cloud.s3.amazonaws.com github-production-release-asset-*.s3.amazonaws.com
 
       # Standard rules
       acl SSL_ports port 443
