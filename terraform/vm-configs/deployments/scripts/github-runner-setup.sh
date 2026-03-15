@@ -77,7 +77,7 @@ if [ ! -f "$RUNNER_FILE" ]; then
 fi
 
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Successfully downloaded GitHub Actions runner"
-RUNNER_INSTALL_DIR="/home/github-runner/github-runner"
+RUNNER_INSTALL_DIR="/home/github-runner"
 mkdir -p "$RUNNER_INSTALL_DIR"
 
 # Extract runner files
@@ -92,7 +92,7 @@ rm "$RUNNER_FILE"
 # Install .NET dependencies (libicu and others)
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Installing .NET dependencies"
 if [ -f "$RUNNER_INSTALL_DIR/.bin/installdependencies.sh" ]; then
-    "$RUNNER_INSTALL_DIR/.bin/installdependencies.sh"
+    "$RUNNER_INSTALL_DIR/bin/installdependencies.sh"
     if [ $? -ne 0 ]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] WARNING: Failed to install .NET dependencies, continuing anyway"
     fi
