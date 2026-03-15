@@ -27,8 +27,3 @@ variable "github_runner_token_prod" {
   description = "GitHub Actions runner token for prod environment"
   sensitive = true
 }
-
-variable "github_runner_org" {
-  type = string
-  description = "GitHub organization for runner registration"
-}
