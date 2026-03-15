@@ -54,7 +54,7 @@ esac
 DOWNLOAD_URL="https://github.com/actions/runner/releases/download/v${GITHUB_RUNNER_VERSION}/actions-runner-linux-${DOWNLOAD_ARCH}-${GITHUB_RUNNER_VERSION}.tar.gz"
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Download URL: $DOWNLOAD_URL"
 
-if ! curl -L -O "$DOWNLOAD_URL"; then
+if ! curl -v -L -O "$DOWNLOAD_URL"; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Failed to download GitHub Actions runner from $DOWNLOAD_URL"
     exit 1
 fi
