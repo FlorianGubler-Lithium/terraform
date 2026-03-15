@@ -13,11 +13,6 @@ variable "vm_ci_base_image_file_id" {
   description = "The file ID of the base image to be used for the VM."
 }
 
-variable "vm_nameservers" {
-  type        = list(string)
-  description = "A list of nameservers to be configured for the VM."
-}
-
 variable "ssh_public_key" {
   type = string
   description = "The SSH public key to be added to the VM for authentication."

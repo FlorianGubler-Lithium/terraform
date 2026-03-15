@@ -11,7 +11,6 @@ module "jump_vm" {
   vm_cpu_cores = 2
   vm_disk_size = 20
   vm_network_devices = ["infra"]
-  vm_nameservers = var.vm_nameservers
   ssh_public_key = var.ssh_public_key
 
   pm_node = var.pm_node
