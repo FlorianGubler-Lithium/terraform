@@ -1,9 +1,12 @@
 version: 2
 renderer: networkd
 ethernets:
-  # Dev zone interface (10.10.0.x/24)
+  # Dev zone interface (10.10.0.100/24)
   ens18:
-    dhcp4: true
-    dhcp4-overrides:
-      use-dns: false
-      use-ntp: true
+    addresses:
+      - 10.10.0.100/24
+    gateway4: 10.10.0.1
+    nameservers:
+      addresses: [8.8.8.8, 8.8.4.4]
+      search: [local]
+    dhcp4: false

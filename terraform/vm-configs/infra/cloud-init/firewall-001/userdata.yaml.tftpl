@@ -61,11 +61,8 @@ packages:
 ssh:
   emit_keys_to_console: false
 
-# Boot commands for IP forwarding and NAT rules
+# Boot commands for proxy environment variables
 bootcmd:
-  - echo "net.ipv4.ip_forward=1" >> /etc/sysctl.conf
-  - sysctl -p
-  # Configure global HTTP proxy environment variables
   - echo "http_proxy=http://10.30.0.11:3128" >> /etc/environment
   - echo "https_proxy=http://10.30.0.11:3128" >> /etc/environment
   - echo "HTTP_PROXY=http://10.30.0.11:3128" >> /etc/environment
@@ -79,11 +76,61 @@ runcmd:
   # Configure git proxy (git does NOT automatically use http_proxy environment variables)
   - git config --global http.proxy http://10.30.0.11:3128
   - git config --global https.proxy http://10.30.0.11:3128
-  # Set up NAT rules for firewall
+
+  # ===== Network Forwarding and NAT Rules =====
+
+  # Enable IP forwarding for inter-zone routing
+  - echo "net.ipv4.ip_forward=1" | sysctl -p
+
+  # ===== DEV ZONE (ens18) PROXY ENFORCEMENT RULES =====
+  # Allow dev zone to reach proxy on port 3128
+  - iptables -A FORWARD -i ens18 -o ens20 -p tcp --dport 3128 -j ACCEPT
+  - iptables -A FORWARD -i ens18 -o ens20 -p tcp --sport 3128 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+  # Block direct HTTP/HTTPS from dev zone (force through proxy)
+  - iptables -A FORWARD -i ens18 -o ens20 -p tcp --dport 80 -j REJECT --reject-with tcp-reset
+  - iptables -A FORWARD -i ens18 -o ens20 -p tcp --dport 443 -j REJECT --reject-with tcp-reset
+
+  # Allow other established traffic from dev zone to infra zone
+  - iptables -A FORWARD -i ens18 -o ens20 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+  # Allow dev zone to reach other infrastructure services (SSH, DNS, etc)
+  - iptables -A FORWARD -i ens18 -o ens20 -p tcp --dport 22 -j ACCEPT
+  - iptables -A FORWARD -i ens18 -o ens20 -p udp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens18 -o ens20 -p tcp --dport 53 -j ACCEPT
+
+  # ===== PROD ZONE (ens19) PROXY ENFORCEMENT RULES =====
+  # Allow prod zone to reach proxy on port 3128
+  - iptables -A FORWARD -i ens19 -o ens20 -p tcp --dport 3128 -j ACCEPT
+  - iptables -A FORWARD -i ens19 -o ens20 -p tcp --sport 3128 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+  # Block direct HTTP/HTTPS from prod zone (force through proxy)
+  - iptables -A FORWARD -i ens19 -o ens20 -p tcp --dport 80 -j REJECT --reject-with tcp-reset
+  - iptables -A FORWARD -i ens19 -o ens20 -p tcp --dport 443 -j REJECT --reject-with tcp-reset
+
+  # Allow other established traffic from prod zone to infra zone
+  - iptables -A FORWARD -i ens19 -o ens20 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+  # Allow prod zone to reach other infrastructure services (SSH, DNS, etc)
+  - iptables -A FORWARD -i ens19 -o ens20 -p tcp --dport 22 -j ACCEPT
+  - iptables -A FORWARD -i ens19 -o ens20 -p udp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens19 -o ens20 -p tcp --dport 53 -j ACCEPT
+
+  # ===== INFRA ZONE (ens20) TO OTHER ZONES =====
+  # Allow established traffic from infra to dev/prod (return packets)
+  - iptables -A FORWARD -i ens20 -o ens18 -m state --state ESTABLISHED,RELATED -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens19 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+  # ===== NAT RULES =====
+  # Masquerade traffic from dev/prod zones going out (for external connectivity via proxy)
   - iptables -t nat -A POSTROUTING -o ens18 -j MASQUERADE
-  - iptables -A FORWARD -i ens18 -o ens19 -m state --state RELATED,ESTABLISHED -j ACCEPT
-  - iptables -A FORWARD -i ens18 -o ens20 -m state --state RELATED,ESTABLISHED -j ACCEPT
-  - iptables -A FORWARD -i ens18 -o ens21 -m state --state RELATED,ESTABLISHED -j ACCEPT
+  - iptables -t nat -A POSTROUTING -o ens19 -j MASQUERADE
+  - iptables -t nat -A POSTROUTING -o ens20 -j MASQUERADE
+
+  # ===== DEFAULT DROP POLICY (implicit) =====
+  # Deny all other forwarding (default policy handles this)
+
+  # Persist iptables rules across reboots
   - netfilter-persistent save
 
 # Final message
