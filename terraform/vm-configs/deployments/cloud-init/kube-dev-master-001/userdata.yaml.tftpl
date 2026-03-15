@@ -60,6 +60,15 @@ packages:
 ssh:
   emit_keys_to_console: false
 
+# Boot commands for global proxy configuration
+bootcmd:
+  # Configure global HTTP proxy environment variables
+  - echo "http_proxy=http://10.30.0.11:3128" >> /etc/environment
+  - echo "https_proxy=http://10.30.0.11:3128" >> /etc/environment
+  - echo "HTTP_PROXY=http://10.30.0.11:3128" >> /etc/environment
+  - echo "HTTPS_PROXY=http://10.30.0.11:3128" >> /etc/environment
+  - echo "no_proxy=localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16" >> /etc/environment
+
 # Write initialization scripts
 write_files:
   - path: /opt/k8s-prerequisites.sh
@@ -77,6 +86,9 @@ write_files:
 runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
+  # Configure git proxy (git does NOT automatically use http_proxy environment variables)
+  - git config --global http.proxy http://10.30.0.11:3128
+  - git config --global https.proxy http://10.30.0.11:3128
   - chmod +x /opt/k8s-prerequisites.sh /opt/k8s-master-init.sh
   - /opt/k8s-prerequisites.sh "${k8s_version}"
   - /opt/k8s-master-init.sh "${k8s_pod_cidr}" "${k8s_version}"
