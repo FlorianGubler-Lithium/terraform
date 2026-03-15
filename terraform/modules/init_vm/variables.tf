@@ -57,3 +57,9 @@ variable "pm_node" {
   type = string
   description = "The Proxmox node on which the VM should be created."
 }
+
+variable "extra_vars" {
+  type = map(any)
+  description = "A map of extra variables to be passed to the Ansible playbook for additional configuration."
+  default = {}
+}

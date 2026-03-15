@@ -60,10 +60,20 @@ packages:
 ssh:
   emit_keys_to_console: false
 
+# Write GitHub Actions runner setup script
+write_files:
+  - path: /opt/github-runner-setup.sh
+    permissions: '0755'
+    encoding: base64
+    content: |
+      ${extra.vars["github_runner_setup_script_content"]}"
+
 # Run commands to ensure qemu-guest-agent is enabled and running
 runcmd:
   - systemctl enable qemu-guest-agent
   - systemctl start qemu-guest-agent
+  - chmod +x /opt/github-runner-setup.sh
+  - /opt/github-runner-setup.sh "${github_runner_org}" "${github_runner_token}"
 
 # Final message
 final_message: "System booted successfully. Instance uptime: $UPTIME seconds"

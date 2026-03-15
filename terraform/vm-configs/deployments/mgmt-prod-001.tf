@@ -1,5 +1,5 @@
 module "mgmt_prod" {
-  source = "../../../modules/init_vm"
+  source = "../../modules/init_vm"
 
   vm_name   = "mgmt-prod-001"
   vm_id     = 2003
@@ -12,6 +12,12 @@ module "mgmt_prod" {
   vm_disk_size = 20
   vm_network_devices = ["prod"]
   ssh_public_key = var.ssh_public_key
+
+  extra_vars = {
+    github_runner_setup_script_content = base64encode(file("vm-configs/deployments/github-runner-setup.sh"))
+    github_runner_token = var.github_runner_token_dev
+    github_runner_org = var.github_runner_org
+  }
 
   pm_node = var.pm_node
 }

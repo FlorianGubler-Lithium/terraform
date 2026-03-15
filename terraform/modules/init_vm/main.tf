@@ -6,9 +6,10 @@ resource "proxmox_virtual_environment_file" "ci_userdata" {
   source_raw {
     file_name = "ci-${var.vm_name}-userdata.yaml"
     data = templatefile("${path.root}/${var.vm_ci_userdata_file_path}", {
-      hostname       = var.vm_name
-      vm_password    = var.vm_password
-      ssh_public_key = var.ssh_public_key
+      hostname                            = var.vm_name
+      vm_password                         = var.vm_password
+      ssh_public_key                      = var.ssh_public_key
+      extra_vars                          = var.extra_vars
     })
   }
 }
@@ -24,6 +25,7 @@ resource "proxmox_virtual_environment_file" "ci_networkdata" {
       hostname       = var.vm_name
       vm_password    = var.vm_password
       ssh_public_key = var.ssh_public_key
+      extra_vars     = var.extra_vars
     })
   }
 }

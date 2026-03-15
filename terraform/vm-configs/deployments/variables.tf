@@ -19,3 +19,41 @@ variable "ssh_public_key" {
   sensitive = true
 }
 
+variable "k8s_version" {
+  type = string
+  description = "Kubernetes version to install (e.g., 1.30.0)"
+  default = "1.30.0"
+}
+
+variable "k8s_pod_cidr_dev" {
+  type = string
+  description = "Pod CIDR for dev Kubernetes cluster"
+  default = "172.16.0.0/16"
+}
+
+variable "k8s_pod_cidr_prod" {
+  type = string
+  description = "Pod CIDR for prod Kubernetes cluster"
+  default = "172.17.0.0/16"
+}
+
+variable "github_runner_token_dev" {
+  type = string
+  description = "GitHub Actions runner token for dev environment"
+  sensitive = true
+  default = ""
+}
+
+variable "github_runner_token_prod" {
+  type = string
+  description = "GitHub Actions runner token for prod environment"
+  sensitive = true
+  default = ""
+}
+
+variable "github_runner_org" {
+  type = string
+  description = "GitHub organization for runner registration"
+  default = ""
+}
+

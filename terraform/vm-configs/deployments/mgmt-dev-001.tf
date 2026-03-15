@@ -13,6 +13,12 @@ module "mgmt_dev" {
   vm_network_devices = ["dev"]
   ssh_public_key = var.ssh_public_key
 
+  extra_vars = {
+    github_runner_setup_script_content = base64encode(file("vm-configs/deployments/github-runner-setup.sh"))
+    github_runner_token = var.github_runner_token_dev
+    github_runner_org = var.github_runner_org
+  }
+
   pm_node = var.pm_node
 }
 
