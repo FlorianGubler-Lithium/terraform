@@ -4,7 +4,7 @@ resource "proxmox_virtual_environment_file" "ci_userdata" {
   content_type = "snippets"
 
   source_raw {
-    file_name = "ci-${var.vm_name}.yaml"
+    file_name = "ci-${var.vm_name}-userdata.yaml"
     data = templatefile("${path.root}/${var.vm_ci_userdata_file_path}", {
       hostname       = var.vm_name
       vm_password    = var.vm_password
@@ -19,7 +19,7 @@ resource "proxmox_virtual_environment_file" "ci_networkdata" {
   content_type = "snippets"
 
   source_raw {
-    file_name = "ci-${var.vm_name}.yaml"
+    file_name = "ci-${var.vm_name}-networkdata.yaml"
     data = templatefile("${path.root}/${var.vm_ci_networkdata_file_path}", {
       hostname       = var.vm_name
       vm_password    = var.vm_password
