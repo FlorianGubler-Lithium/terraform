@@ -40,13 +40,10 @@ resource "proxmox_virtual_environment_sdn_subnet" "backend_dhcp_subnets" {
     k => v if try(v.managed, false)
   }
 
-  zone    = proxmox_virtual_environment_sdn_zone_vlan.backend.id
   vnet = proxmox_virtual_environment_sdn_vnet.backend_vnets[each.key].id
 
   cidr    = each.value.cidr
   gateway = each.value.gateway
-
-  dhcp    = true
 
   dhcp_range = {
     start = cidrhost(each.value.cidr, 10)
