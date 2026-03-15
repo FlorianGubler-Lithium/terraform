@@ -89,6 +89,17 @@ chown -R github-runner:github-runner "$RUNNER_INSTALL_DIR"
 
 rm "$RUNNER_FILE"
 
+# Install .NET dependencies (libicu and others)
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Installing .NET dependencies"
+if [ -f "$RUNNER_INSTALL_DIR/.bin/installdependencies.sh" ]; then
+    "$RUNNER_INSTALL_DIR/.bin/installdependencies.sh"
+    if [ $? -ne 0 ]; then
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] WARNING: Failed to install .NET dependencies, continuing anyway"
+    fi
+else
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] WARNING: installdependencies.sh not found at $RUNNER_INSTALL_DIR/.bin/installdependencies.sh"
+fi
+
 # Register the runner
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Registering runner with GitHub organization"
 su - github-runner -c "cd $RUNNER_INSTALL_DIR && ./config.sh --url 'https://github.com/${GITHUB_ORG}' --token '${GITHUB_TOKEN}' --name '${RUNNER_NAME}' --runnergroup '${RUNNER_GROUP}' --work '_work' --replace --unattended"
