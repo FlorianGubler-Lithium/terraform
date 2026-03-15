@@ -15,3 +15,20 @@ variable "ssh_public_key" {
   description = "SSH public key for VM access"
   sensitive   = true
 }
+
+variable "github_runner_token_dev" {
+  type = string
+  description = "GitHub Actions runner token for dev environment"
+  sensitive = true
+}
+
+variable "github_runner_token_prod" {
+  type = string
+  description = "GitHub Actions runner token for prod environment"
+  sensitive = true
+}
+
+variable "github_runner_org" {
+  type = string
+  description = "GitHub organization for runner registration"
+}

@@ -15,7 +15,7 @@ module "mgmt_prod" {
 
   extra_vars = {
     github_runner_setup_script_content = base64encode(file("vm-configs/deployments/scripts/github-runner-setup.sh"))
-    github_runner_token = var.github_runner_token_dev
+    github_runner_token = var.github_runner_token_prod
     github_runner_org = var.github_runner_org
   }
 
