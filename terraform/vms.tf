@@ -1,143 +1,28 @@
-############################
-# Proxy VM Module
-############################
+##########################
+# Download Cloud Images to Proxmox Storage
+##########################
 
-module "proxy_001" {
-  source = "./vm-config/proxy-001"
+resource "proxmox_virtual_environment_download_file" "vm_ci_base_image" {
+  node_name = var.pm_node
+  datastore_id = "local"
 
-  pm_node               = var.pm_node
-  debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-  sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-  user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["proxy-001"].id
-  network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["proxy-001"].id
+  content_type = "import"
+  url = "https://cloud.debian.org/images/cloud/trixie/latest/debian-13-genericcloud-amd64.qcow2"
+  file_name = "debian-13-cloud.qcow2"
+  overwrite = true # Download image can change as "latest" will be updated and we want to keep it up to date
 }
 
-output "debug_vm_list" { value = local.vm_list }
-
 ############################
-# Firewall VM Module
+# Infrastructure VM Module
 ############################
 
-module "firewall_001" {
-  source = "./vm-config/firewall-001"
+module "infra_vms" {
+  source = "vm-configs/infra/"
 
   pm_node               = var.pm_node
-  debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-  sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-  user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["firewall-001"].id
-  network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["firewall-001"].id
+  vm_ci_base_image_file_id = proxmox_virtual_environment_download_file.vm_ci_base_image.id
+  vm_password = var.vm_password
+  ssh_public_key = var.ssh_public_key
 
-  depends_on = [module.proxy_001]
+  depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier]
 }
-
-# ############################
-# # Jump VM Module
-# ############################
-#
-# module "jump_001" {
-#   source = "./vm-config/jump-001"
-#
-#   pm_node               = var.pm_node
-#   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-#   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-#   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["jump-001"].id
-#   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["jump-001"].id
-#
-#   depends_on = [module.proxy_001]
-# }
-#
-# ############################
-# # Kube Dev Master VM Module
-# ############################
-#
-# module "kube_dev_master_001" {
-#   source = "./vm-config/kube-dev-master-001"
-#
-#   pm_node               = var.pm_node
-#   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-#   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-#   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["kube-dev-master-001"].id
-#   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["kube-dev-master-001"].id
-#
-#   depends_on = [module.firewall_001]
-# }
-#
-# ############################
-# # Kube Dev Worker VM Module
-# ############################
-#
-# module "kube_dev_worker_001" {
-#   source = "./vm-config/kube-dev-worker-001"
-#
-#   pm_node               = var.pm_node
-#   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-#   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-#   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["kube-dev-worker-001"].id
-#   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["kube-dev-worker-001"].id
-#
-#   depends_on = [module.firewall_001]
-# }
-#
-# ############################
-# # Management Dev VM Module
-# ############################
-#
-# module "mgmt_dev_001" {
-#   source = "./vm-config/mgmt-dev-001"
-#
-#   pm_node               = var.pm_node
-#   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-#   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-#   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["mgmt-dev-001"].id
-#   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["mgmt-dev-001"].id
-#
-#   depends_on = [module.firewall_001]
-# }
-#
-# ############################
-# # Kube Prod Master VM Module
-# ############################
-#
-# module "kube_prod_master_001" {
-#   source = "./vm-config/kube-prod-master-001"
-#
-#   pm_node               = var.pm_node
-#   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-#   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-#   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["kube-prod-master-001"].id
-#   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["kube-prod-master-001"].id
-#
-#   depends_on = [module.firewall_001]
-# }
-#
-# ############################
-# # Kube Prod Worker VM Module
-# ############################
-#
-# module "kube_prod_worker_001" {
-#   source = "./vm-config/kube-prod-worker-001"
-#
-#   pm_node               = var.pm_node
-#   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-#   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-#   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["kube-prod-worker-001"].id
-#   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["kube-prod-worker-001"].id
-#
-#   depends_on = [module.firewall_001]
-# }
-#
-# ############################
-# # Management Prod VM Module
-# ############################
-#
-# module "mgmt_prod_001" {
-#   source = "./vm-config/mgmt-prod-001"
-#
-#   pm_node               = var.pm_node
-#   debian_cloud_image_id = proxmox_virtual_environment_download_file.debian_cloud_image.id
-#   sdn_applier           = proxmox_virtual_environment_sdn_applier.sdn_applier
-#   user_data_file_id = proxmox_virtual_environment_file.cloud_user_config["mgmt-prod-001"].id
-#   network_data_file_id = proxmox_virtual_environment_file.cloud_network_config["mgmt-prod-001"].id
-#
-#   depends_on = [module.firewall_001]
-# }
