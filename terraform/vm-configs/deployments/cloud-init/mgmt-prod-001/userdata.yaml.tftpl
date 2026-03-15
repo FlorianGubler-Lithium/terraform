@@ -66,7 +66,7 @@ write_files:
     permissions: '0755'
     encoding: base64
     content: |
-      ${extra.vars["github_runner_setup_script_content"]}"
+      ${extra_vars["github_runner_setup_script_content"]}"
 
 # Run commands to ensure qemu-guest-agent is enabled and running
 runcmd:
