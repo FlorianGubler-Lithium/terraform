@@ -48,11 +48,6 @@ variable "vm_network_devices" {
   description = "A list of network bridges to which the VM's network devices should be connected."
 }
 
-variable "vm_nameservers" {
-  type = list(string)
-  description = "A list of nameservers to be configured in the VM's resolv.conf file."
-}
-
 variable "ssh_public_key" {
   type        = string
   description = "The SSH public key to be added to the VM for authentication."
