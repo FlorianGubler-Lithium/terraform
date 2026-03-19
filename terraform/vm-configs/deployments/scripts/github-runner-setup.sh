@@ -112,13 +112,28 @@ get_registration_token() {
 
     token_response=$(github_api_call "POST" "/orgs/${org}/actions/runners/registration-token" "" || return 1)
 
-    token=$(echo "$token_response" | grep -o '"token":"[^"]*' | cut -d'"' -f4)
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Token response: $token_response"
+
+    # Try multiple parsing methods for robustness
+    token=$(echo "$token_response" | grep -o '"token":"[^"]*' | cut -d'"' -f4 2>/dev/null || true)
+
+    # If that didn't work, try with jq if available
+    if [ -z "$token" ] && command -v jq &> /dev/null; then
+        token=$(echo "$token_response" | jq -r '.token' 2>/dev/null || true)
+    fi
+
+    # Last resort: try alternative grep pattern
+    if [ -z "$token" ]; then
+        token=$(echo "$token_response" | sed -n 's/.*"token":"\([^"]*\)".*/\1/p' 2>/dev/null || true)
+    fi
 
     if [ -z "$token" ]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Failed to extract token from response"
+        echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Raw response was: $token_response"
         return 1
     fi
 
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Successfully generated registration token (length: ${#token})"
     echo "$token"
     return 0
 }
@@ -170,9 +185,14 @@ if ! create_runner_group_if_needed "$GITHUB_ORG" "$RUNNER_GROUP"; then
 fi
 
 # Generate registration token
+echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Attempting to generate registration token from PAT..."
 if ! GITHUB_TOKEN=$(get_registration_token "$GITHUB_ORG"); then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Failed to generate registration token"
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Make sure your PAT has the 'admin:org_self_hosted_runner' scope"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Troubleshooting:"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup]   1. Verify PAT has 'admin:org_self_hosted_runner' scope (or 'Self-hosted runners: Read and write' for fine-grained)"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup]   2. Verify PAT has not expired"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup]   3. Verify organization name is correct: $GITHUB_ORG"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup]   4. Check GitHub API status at https://www.githubstatus.com"
     exit 1
 fi
 
