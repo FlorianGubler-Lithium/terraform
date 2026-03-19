@@ -60,21 +60,22 @@ packages:
 ssh:
   emit_keys_to_console: false
 
+# Boot commands for global proxy configuration
+bootcmd:
+  # Configure global HTTP proxy environment variables
+  - echo "http_proxy=http://10.30.0.11:3128" >> /etc/environment
+  - echo "https_proxy=http://10.30.0.11:3128" >> /etc/environment
+  - echo "HTTP_PROXY=http://10.30.0.11:3128" >> /etc/environment
+  - echo "HTTPS_PROXY=http://10.30.0.11:3128" >> /etc/environment
+  - echo "no_proxy=localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16" >> /etc/environment
+
 # Write GitHub Actions runner setup script
 write_files:
-  - path: /etc/profile.d/proxy.sh
-    permissions: '0644'
-    content: |
-      # Proxy configuration for all users
-      export http_proxy=http://10.30.0.11:3128
-      export https_proxy=http://10.30.0.11:3128
-      export HTTP_PROXY=http://10.30.0.11:3128
-      export HTTPS_PROXY=http://10.30.0.11:3128
-      export no_proxy=localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16
   - path: /opt/github-runner-setup.sh
     permissions: '0755'
     encoding: base64
-    content: ${extra_vars["github_runner_setup_script_content"]}
+    content: |
+      ${extra_vars["github_runner_setup_script_content"]}"
 
 # Run commands to ensure qemu-guest-agent is enabled and running
 runcmd:
