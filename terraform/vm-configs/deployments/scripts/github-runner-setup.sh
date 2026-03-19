@@ -110,7 +110,7 @@ get_registration_token() {
 
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Generating runner registration token"
 
-    token_response=$(github_api_call "POST" "/orgs/${org}/actions/runners/registration-token" "" || return 1)
+    token_response=$(github_api_call "POST" "/orgs/${org}/actions/runners/registration-token" "")
 
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Token response: $token_response"
 
@@ -130,12 +130,11 @@ get_registration_token() {
     if [ -z "$token" ]; then
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Failed to extract token from response"
         echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Raw response was: $token_response"
-        return 1
+        exit 1
     fi
 
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Successfully generated registration token (length: ${#token})"
-    echo "$token"
-    return 0
+    echo "REGISTRATION_TOKEN:$token"
 }
 
 # Parse arguments
@@ -186,7 +185,10 @@ fi
 
 # Generate registration token
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Attempting to generate registration token from PAT..."
-if ! GITHUB_TOKEN=$(get_registration_token "$GITHUB_ORG"); then
+token_output=$(get_registration_token "$GITHUB_ORG")
+GITHUB_TOKEN=$(echo "$token_output" | grep "^REGISTRATION_TOKEN:" | cut -d':' -f2)
+
+if [ -z "$GITHUB_TOKEN" ]; then
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] ERROR: Failed to generate registration token"
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup] Troubleshooting:"
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] [github-runner-setup]   1. Verify PAT has 'admin:org_self_hosted_runner' scope (or 'Self-hosted runners: Read and write' for fine-grained)"
