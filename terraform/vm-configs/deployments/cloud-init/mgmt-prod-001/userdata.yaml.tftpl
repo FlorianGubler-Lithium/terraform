@@ -69,14 +69,6 @@ bootcmd:
   - echo "HTTPS_PROXY=http://10.30.0.11:3128" >> /etc/environment
   - echo "no_proxy=localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16" >> /etc/environment
 
-# Write GitHub Actions runner setup script
-write_files:
-  - path: /opt/github-runner-setup.sh
-    permissions: '0755'
-    encoding: base64
-    content: |
-      ${extra_vars["github_runner_setup_script_content"]}"
-
 # Run commands to ensure qemu-guest-agent is enabled and running
 runcmd:
   - systemctl enable qemu-guest-agent
@@ -84,8 +76,6 @@ runcmd:
   # Configure git proxy (git does NOT automatically use http_proxy environment variables)
   - git config --global http.proxy http://10.30.0.11:3128
   - git config --global https.proxy http://10.30.0.11:3128
-  - chmod +x /opt/github-runner-setup.sh
-  - /opt/github-runner-setup.sh '${extra_vars["github_runner_org"]}' '${extra_vars["github_pat"]}' '${extra_vars["github_runner_version"]}' '${extra_vars["github_runner_group"]}' >> /var/log/github-runner-setup.log 2>&1
 
 # Final message
 final_message: "System booted successfully. Instance uptime: $UPTIME seconds"

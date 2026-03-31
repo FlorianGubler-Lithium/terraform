@@ -18,14 +18,6 @@ module "mgmt_prod" {
   ]
   ssh_public_key = var.ssh_public_key
 
-  extra_vars = {
-    github_runner_setup_script_content = base64encode(file("vm-configs/deployments/scripts/github-runner-setup.sh"))
-    github_pat = var.github_pat
-    github_runner_org = var.github_runner_org
-    github_runner_version = var.github_runner_version
-    github_runner_group = "internal-prod"
-  }
-
   pm_node = var.pm_node
 }
 
