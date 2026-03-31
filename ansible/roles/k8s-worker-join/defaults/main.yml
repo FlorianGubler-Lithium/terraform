@@ -1,0 +1,8 @@
+---
+# Default variables for k8s-worker-join role
+
+# These will be populated at runtime from master node
+k8s_join_token: ""
+k8s_api_endpoint: ""
+k8s_ca_cert_hash: ""
+

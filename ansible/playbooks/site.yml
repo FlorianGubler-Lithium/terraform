@@ -1,0 +1,13 @@
+---
+# Lithium Infrastructure Orchestrator Playbook
+# Master playbook that orchestrates all infrastructure provisioning
+# Run this for complete setup: ansible-playbook playbooks/site.yml
+
+- name: Setup Kubernetes Clusters
+  import_playbook: k8s-setup.yml
+  tags: [kubernetes, k8s]
+
+- name: Setup GitHub Actions Runners
+  import_playbook: github-runner-setup.yml
+  tags: [github-runner, runners]
+

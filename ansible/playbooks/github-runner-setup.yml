@@ -1,0 +1,65 @@
+---
+# GitHub Actions Runner Setup Playbook
+# Configures and registers self-hosted runners with GitHub organization
+
+- name: GitHub Actions Runner Setup
+  hosts: github_runners
+  gather_facts: yes
+  become: no
+
+  pre_tasks:
+    - name: Wait for SSH to be ready
+      ansible.builtin.wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: Verify GitHub PAT is available
+      ansible.builtin.assert:
+        that:
+          - vault_github_pat is defined
+          - vault_github_pat | length > 0
+        fail_msg: "GitHub PAT (vault_github_pat) not defined. Ensure Ansible vault is unlocked."
+      no_log: true
+
+    - name: Display runner setup information
+      ansible.builtin.debug:
+        msg: |
+          Setting up GitHub Actions runner
+          Runner Name: {{ inventory_hostname }}
+          Organization: {{ github_org }}
+          Runner Group: {{ github_runner_group }}
+          Environment: {{ hostvars[inventory_hostname].get('vm_environment', 'unknown') }}
+
+  roles:
+    - role: github-runner-setup
+      tags: [github-runner, setup]
+
+  post_tasks:
+    - name: Verify runner is operational
+      ansible.builtin.uri:
+        url: "https://api.github.com/orgs/{{ github_org }}/actions/runners"
+        method: GET
+        headers:
+          Authorization: "token {{ vault_github_pat }}"
+          Accept: "application/vnd.github.v3+json"
+      register: runners_list
+      no_log: true
+      environment:
+        http_proxy: "{{ http_proxy }}"
+        https_proxy: "{{ https_proxy }}"
+        no_proxy: "{{ no_proxy }}"
+
+    - name: Check runner registration in API
+      ansible.builtin.set_fact:
+        runner_registered: "{{ runners_list.json.runners | selectattr('name', 'equalto', inventory_hostname) | length > 0 }}"
+
+    - name: Display final status
+      ansible.builtin.debug:
+        msg: |
+          {% if runner_registered %}
+          ✓ Runner {{ inventory_hostname }} successfully registered with GitHub
+          {% else %}
+          ⚠ Warning: Runner {{ inventory_hostname }} may not be visible in GitHub API yet
+          This can be normal - allow 30-60 seconds for synchronization
+          {% endif %}
+

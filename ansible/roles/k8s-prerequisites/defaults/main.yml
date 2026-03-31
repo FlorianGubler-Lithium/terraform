@@ -1,0 +1,12 @@
+---
+# Default variables for k8s-prerequisites role
+
+# Kubernetes and CRI-O versions
+k8s_version: "1.30.0"
+crio_version: "1.30"
+
+# Proxy settings
+http_proxy: "http://10.30.0.11:3128"
+https_proxy: "http://10.30.0.11:3128"
+no_proxy: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16"
+

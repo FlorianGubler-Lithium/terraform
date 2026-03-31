@@ -1,0 +1,60 @@
+---
+# Unified Kubernetes Cluster Setup Playbook
+# Initializes Kubernetes masters and joins workers to cluster
+# Uses inventory groups to determine node roles
+
+- name: Kubernetes Cluster Setup
+  hosts: k8s_all
+  gather_facts: yes
+  become: no
+
+  pre_tasks:
+    - name: Verify inventory organization
+      ansible.builtin.debug:
+        msg: |
+          K8s Masters: {{ groups.get('k8s_masters', []) }}
+          K8s Workers: {{ groups.get('k8s_workers', []) }}
+
+  roles:
+    - name: Install Kubernetes prerequisites on all nodes
+      role: k8s-prerequisites
+      apply:
+        tags: always
+
+---
+# Master initialization play
+- name: Initialize Kubernetes Masters
+  hosts: k8s_masters
+  gather_facts: yes
+  become: no
+
+  roles:
+    - role: k8s-master-init
+      tags: [master, init]
+
+---
+# Worker join play
+- name: Join Kubernetes Workers
+  hosts: k8s_workers
+  gather_facts: yes
+  become: no
+  serial: 1  # Join workers one at a time to avoid overwhelming control plane
+
+  pre_tasks:
+    - name: Wait for cluster masters to be ready
+      ansible.builtin.wait_for:
+        host: "{{ hostvars[groups['k8s_masters'][0]].ansible_host }}"
+        port: 6443
+        timeout: 600
+      delegate_to: localhost
+
+  roles:
+    - role: k8s-worker-join
+      tags: [worker, join]
+
+  post_tasks:
+    - name: Display node join status
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} successfully joined the cluster"
+      tags: [worker, join]
+

@@ -1,0 +1,11 @@
+---
+# Default variables for k8s-master-init role
+
+k8s_version: "1.30.0"
+k8s_pod_cidr: "172.16.0.0/16"
+calico_version: "v3.27.0"
+
+http_proxy: "http://10.30.0.11:3128"
+https_proxy: "http://10.30.0.11:3128"
+no_proxy: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16"
+

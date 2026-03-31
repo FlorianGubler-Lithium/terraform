@@ -10,7 +10,12 @@ module "mgmt_dev" {
   vm_memory = 4096
   vm_cpu_cores = 2
   vm_disk_size = 20
-  vm_network_devices = ["dev"]
+  vm_network_devices = [
+    {
+      bridge = "dev"
+      ip     = "10.10.0.100/24"
+    }
+  ]
   ssh_public_key = var.ssh_public_key
 
   extra_vars = {

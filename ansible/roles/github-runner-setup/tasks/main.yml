@@ -1,0 +1,165 @@
+---
+# GitHub Actions Runner Setup Role
+# Register and configure self-hosted GitHub Actions runners
+
+- name: Create github-runner user
+  ansible.builtin.user:
+    name: "{{ github_runner_user }}"
+    home: "{{ github_runner_home }}"
+    shell: /bin/bash
+    state: present
+  become: yes
+
+- name: Ensure github-runner home directory exists
+  ansible.builtin.file:
+    path: "{{ github_runner_home }}"
+    state: directory
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    mode: '0755'
+  become: yes
+
+- name: Configure proxy settings
+  ansible.builtin.shell: |
+    cat > /home/{{ github_runner_user }}/.bashrc.d/proxy << EOF
+    export http_proxy={{ http_proxy }}
+    export https_proxy={{ https_proxy }}
+    export HTTP_PROXY={{ http_proxy }}
+    export HTTPS_PROXY={{ https_proxy }}
+    export no_proxy={{ no_proxy }}
+    EOF
+    mkdir -p /home/{{ github_runner_user }}/.bashrc.d
+  become: yes
+
+- name: Configure git proxy
+  ansible.builtin.shell: |
+    git config --global http.proxy {{ http_proxy }}
+    git config --global https.proxy {{ https_proxy }}
+  become: yes
+  become_user: "{{ github_runner_user }}"
+
+- name: Create runner registration token from GitHub API
+  ansible.builtin.uri:
+    url: "https://api.github.com/orgs/{{ github_org }}/actions/runners/registration-token"
+    method: POST
+    headers:
+      Authorization: "token {{ vault_github_pat }}"
+      Accept: "application/vnd.github.v3+json"
+    status_code: 201
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+    no_proxy: "{{ no_proxy }}"
+  register: github_token_response
+  no_log: true
+  retries: 3
+  delay: 5
+  until: github_token_response.status == 201
+
+- name: Set registration token fact
+  ansible.builtin.set_fact:
+    github_registration_token: "{{ github_token_response.json.token }}"
+  no_log: true
+
+- name: Download GitHub Actions runner
+  ansible.builtin.get_url:
+    url: "https://github.com/actions/runner/releases/download/v{{ github_runner_version }}/actions-runner-linux-{{ ansible_architecture }}-{{ github_runner_version }}.tar.gz"
+    dest: "/tmp/actions-runner-linux-{{ ansible_architecture }}-{{ github_runner_version }}.tar.gz"
+    mode: '0644'
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+    no_proxy: "{{ no_proxy }}"
+  register: runner_download
+  retries: 3
+  delay: 5
+  until: runner_download is succeeded
+
+- name: Extract runner archive
+  ansible.builtin.unarchive:
+    src: "/tmp/actions-runner-linux-{{ ansible_architecture }}-{{ github_runner_version }}.tar.gz"
+    dest: "{{ github_runner_home }}"
+    remote_src: yes
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+  become: yes
+
+- name: Clean up runner tarball
+  ansible.builtin.file:
+    path: "/tmp/actions-runner-linux-{{ ansible_architecture }}-{{ github_runner_version }}.tar.gz"
+    state: absent
+
+- name: Install runner dependencies
+  ansible.builtin.shell: |
+    bash {{ github_runner_home }}/bin/installdependencies.sh
+  become: yes
+  register: deps_install
+  ignore_errors: yes
+
+- name: Create runner configuration directory
+  ansible.builtin.file:
+    path: "{{ github_runner_home }}/.runner"
+    state: directory
+    owner: "{{ github_runner_user }}"
+    group: "{{ github_runner_user }}"
+    mode: '0755'
+  become: yes
+
+- name: Register GitHub Actions runner
+  ansible.builtin.shell: |
+    cd {{ github_runner_home }}
+    ./config.sh \
+      --url https://github.com/{{ github_org }} \
+      --token {{ github_registration_token }} \
+      --name {{ inventory_hostname }} \
+      --runnergroup "{{ github_runner_group }}" \
+      --labels "{{ github_runner_labels | join(',') }}" \
+      --unattended \
+      --replace
+  become: yes
+  become_user: "{{ github_runner_user }}"
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+    no_proxy: "{{ no_proxy }}"
+  no_log: true
+  register: runner_config
+  retries: 3
+  delay: 10
+  until: runner_config.rc == 0
+
+- name: Install runner as systemd service
+  ansible.builtin.shell: |
+    cd {{ github_runner_home }}
+    ./svc.sh install {{ github_runner_user }}
+  become: yes
+
+- name: Enable and start runner service
+  ansible.builtin.systemd:
+    name: actions.runner.{{ github_org }}.{{ inventory_hostname }}
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  become: yes
+  register: service_start
+
+- name: Wait for runner to be online
+  ansible.builtin.pause:
+    seconds: 5
+
+- name: Verify runner service is active
+  ansible.builtin.systemd:
+    name: actions.runner.{{ github_org }}.{{ inventory_hostname }}
+  become: yes
+  register: runner_service
+  failed_when: runner_service.status.ActiveState != 'active'
+
+- name: Display runner setup status
+  ansible.builtin.debug:
+    msg: |
+      GitHub Actions runner installed successfully
+      Runner Name: {{ inventory_hostname }}
+      Organization: {{ github_org }}
+      Group: {{ github_runner_group }}
+      Service: actions.runner.{{ github_org }}.{{ inventory_hostname }}
+

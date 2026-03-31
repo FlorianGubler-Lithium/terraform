@@ -10,7 +10,12 @@ module "kube_prod_master" {
   vm_memory = 4096
   vm_cpu_cores = 2
   vm_disk_size = 20
-  vm_network_devices = ["prod"]
+  vm_network_devices = [
+    {
+      bridge = "prod"
+      ip     = "10.10.0.201/24"
+    }
+  ]
   ssh_public_key = var.ssh_public_key
 
   pm_node = var.pm_node

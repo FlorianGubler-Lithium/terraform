@@ -1,0 +1,182 @@
+---
+# Kubernetes Master Initialization Role
+# Initialize master node with kubeadm and install CNI
+
+- name: Check if Kubernetes is already initialized
+  ansible.builtin.stat:
+    path: /etc/kubernetes/manifests/kube-apiserver.yaml
+  register: k8s_initialized
+
+- name: Initialize Kubernetes master cluster
+  ansible.builtin.shell: |
+    set -euo pipefail
+    kubeadm init \
+      --cri-socket unix:///var/run/crio/crio.sock \
+      --pod-network-cidr="{{ k8s_pod_cidr }}" \
+      --kubernetes-version="v{{ k8s_version }}" \
+      --ignore-preflight-errors=NumCPU,MemSize \
+      --skip-token-print
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
+    no_proxy: "{{ no_proxy | default('') }}"
+  become: yes
+  when: not k8s_initialized.stat.exists
+  register: kubeadm_init
+  changed_when: kubeadm_init.rc == 0
+
+- name: Create .kube directory for root
+  ansible.builtin.file:
+    path: /root/.kube
+    state: directory
+    mode: '0700'
+  become: yes
+
+- name: Copy kubeconfig to root
+  ansible.builtin.shell: |
+    cp /etc/kubernetes/admin.conf /root/.kube/config
+    chmod 600 /root/.kube/config
+  become: yes
+  when: not k8s_initialized.stat.exists
+  changed_when: false
+
+- name: Create .kube directory for debian user
+  ansible.builtin.file:
+    path: /home/debian/.kube
+    state: directory
+    mode: '0700'
+    owner: debian
+    group: debian
+  become: yes
+
+- name: Copy kubeconfig for debian user
+  ansible.builtin.shell: |
+    cp /etc/kubernetes/admin.conf /home/debian/.kube/config
+    chown debian:debian /home/debian/.kube/config
+    chmod 600 /home/debian/.kube/config
+  become: yes
+  when: not k8s_initialized.stat.exists
+  changed_when: false
+
+- name: Wait for Kubernetes API server to be ready
+  ansible.builtin.shell: |
+    for i in {1..60}; do
+      if kubectl --kubeconfig=/root/.kube/config get nodes >/dev/null 2>&1; then
+        echo "API server is ready"
+        exit 0
+      fi
+      echo "Waiting for API server... ($i/60)"
+      sleep 2
+    done
+    echo "API server failed to start"
+    exit 1
+  become: yes
+  changed_when: false
+  register: api_ready
+  until: api_ready.rc == 0
+  retries: 1
+
+- name: Deploy Calico CNI - Create calico namespace
+  kubernetes.core.k8s:
+    name: calico-system
+    api_version: v1
+    kind: Namespace
+    state: present
+    kubeconfig: /root/.kube/config
+  become: yes
+  when: not k8s_initialized.stat.exists
+
+- name: Deploy Calico CNI - Apply Tigera operator
+  ansible.builtin.shell: |
+    kubectl --kubeconfig=/root/.kube/config apply -f https://raw.githubusercontent.com/projectcalico/calico/{{ calico_version }}/manifests/tigera-operator.yaml
+  become: yes
+  when: not k8s_initialized.stat.exists
+  environment:
+    http_proxy: "{{ http_proxy | default('') }}"
+    https_proxy: "{{ https_proxy | default('') }}"
+    no_proxy: "{{ no_proxy | default('') }}"
+  register: calico_deploy
+  until: calico_deploy.rc == 0
+  retries: 3
+  delay: 5
+  changed_when: "'created' in calico_deploy.stderr or 'configured' in calico_deploy.stderr"
+
+- name: Wait for Tigera operator to be ready
+  ansible.builtin.shell: |
+    for i in {1..30}; do
+      if kubectl --kubeconfig=/root/.kube/config -n calico-system get deployment tigera-operator >/dev/null 2>&1; then
+        echo "Tigera operator is ready"
+        exit 0
+      fi
+      echo "Waiting for Tigera operator... ($i/30)"
+      sleep 2
+    done
+    echo "Tigera operator failed to start"
+    exit 1
+  become: yes
+  changed_when: false
+
+- name: Create Calico configuration CR
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /root/.kube/config
+    definition:
+      apiVersion: operator.tigera.io/v1
+      kind: Installation
+      metadata:
+        name: default
+      spec:
+        calicoNetwork:
+          ipPools:
+            - blockSize: 26
+              cidr: "{{ k8s_pod_cidr }}"
+              encapsulation: VXLan
+              natOutgoing: Enabled
+              nodeSelector: all()
+  become: yes
+  when: not k8s_initialized.stat.exists
+
+- name: Generate kubeadm join token
+  ansible.builtin.shell: |
+    kubeadm token create --ttl 24h
+  become: yes
+  register: join_token
+  changed_when: false
+  when: not k8s_initialized.stat.exists
+
+- name: Get certificate key for join
+  ansible.builtin.shell: |
+    kubeadm init phase upload-certs --upload-certs 2>&1 | tail -1
+  become: yes
+  register: cert_key
+  changed_when: false
+  when: not k8s_initialized.stat.exists
+
+- name: Get API server endpoint
+  ansible.builtin.shell: |
+    kubectl --kubeconfig=/root/.kube/config cluster-info | grep 'Kubernetes master' | awk '/https/ {print $NF}'
+  become: yes
+  register: api_endpoint
+  changed_when: false
+
+- name: Get CA cert hash
+  ansible.builtin.shell: |
+    openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+  become: yes
+  register: ca_cert_hash
+  changed_when: false
+
+- name: Set join token facts for workers
+  ansible.builtin.set_fact:
+    k8s_join_token: "{{ join_token.stdout }}"
+    k8s_api_endpoint: "{{ api_endpoint.stdout }}"
+    k8s_ca_cert_hash: "{{ ca_cert_hash.stdout }}"
+  when: not k8s_initialized.stat.exists
+
+- name: Display cluster initialization status
+  ansible.builtin.debug:
+    msg: |
+      Kubernetes master initialized successfully
+      API Endpoint: {{ k8s_api_endpoint }}
+      Join Token: {{ k8s_join_token | default('(already initialized)') }}
+

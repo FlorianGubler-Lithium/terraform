@@ -1,0 +1,101 @@
+---
+# Kubernetes Worker Join Role
+# Join worker nodes to the Kubernetes cluster
+
+- name: Check if already joined to cluster
+  ansible.builtin.stat:
+    path: /etc/kubernetes/kubelet.conf
+  register: kubelet_config
+
+- name: Get join token from master
+  ansible.builtin.set_fact:
+    k8s_join_token: "{{ hostvars[groups['k8s_masters'][0]]['k8s_join_token'] }}"
+    k8s_api_endpoint: "{{ hostvars[groups['k8s_masters'][0]]['k8s_api_endpoint'] }}"
+    k8s_ca_cert_hash: "{{ hostvars[groups['k8s_masters'][0]]['k8s_ca_cert_hash'] }}"
+  when: not kubelet_config.stat.exists
+  register: join_facts
+
+- name: Validate join token was obtained
+  ansible.builtin.assert:
+    that:
+      - k8s_join_token is defined
+      - k8s_api_endpoint is defined
+      - k8s_ca_cert_hash is defined
+    fail_msg: "Failed to obtain join token from master. Ensure master role was executed first."
+  when: not kubelet_config.stat.exists
+
+- name: Join worker node to cluster
+  ansible.builtin.shell: |
+    set -euo pipefail
+    kubeadm join {{ k8s_api_endpoint }} \
+      --token {{ k8s_join_token }} \
+      --discovery-token-ca-cert-hash sha256:{{ k8s_ca_cert_hash }} \
+      --cri-socket unix:///var/run/crio/crio.sock \
+      --ignore-preflight-errors=NumCPU,MemSize
+  become: yes
+  when: not kubelet_config.stat.exists
+  register: kubeadm_join
+  changed_when: kubeadm_join.rc == 0
+
+- name: Create .kube directory for debian user
+  ansible.builtin.file:
+    path: /home/debian/.kube
+    state: directory
+    mode: '0700'
+    owner: debian
+    group: debian
+  become: yes
+
+- name: Copy kubelet config for debian user
+  ansible.builtin.shell: |
+    cp /etc/kubernetes/kubelet.conf /home/debian/.kube/config
+    chown debian:debian /home/debian/.kube/config
+    chmod 600 /home/debian/.kube/config
+  become: yes
+  when: not kubelet_config.stat.exists
+  changed_when: false
+
+- name: Wait for kubelet to be ready
+  ansible.builtin.shell: |
+    for i in {1..60}; do
+      if systemctl is-active --quiet kubelet; then
+        echo "Kubelet is running"
+        exit 0
+      fi
+      echo "Waiting for kubelet... ($i/60)"
+      sleep 2
+    done
+    echo "Kubelet failed to start"
+    exit 1
+  become: yes
+  changed_when: false
+  register: kubelet_ready
+  until: kubelet_ready.rc == 0
+  retries: 1
+
+- name: Wait for node to be ready (from master)
+  ansible.builtin.shell: |
+    export KUBECONFIG=/root/.kube/config
+    for i in {1..60}; do
+      if kubectl get nodes {{ inventory_hostname }} -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}' | grep -q "True"; then
+        echo "Node is ready"
+        exit 0
+      fi
+      echo "Waiting for node to be ready... ($i/60)"
+      sleep 2
+    done
+    echo "Node failed to become ready"
+    exit 1
+  become: yes
+  delegate_to: "{{ groups['k8s_masters'][0] }}"
+  changed_when: false
+  register: node_ready
+  until: node_ready.rc == 0
+  retries: 1
+  when: kubelet_config.stat.exists or kubeadm_join.changed
+
+- name: Display join status
+  ansible.builtin.debug:
+    msg: |
+      Worker node {{ inventory_hostname }} joined cluster successfully
+

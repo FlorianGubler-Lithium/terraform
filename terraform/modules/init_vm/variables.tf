@@ -44,8 +44,11 @@ variable "vm_disk_size" {
 }
 
 variable "vm_network_devices" {
-  type        = list(string)
-  description = "A list of network bridges to which the VM's network devices should be connected."
+  type = list(object({
+    bridge = string
+    ip     = optional(string)
+  }))
+  description = "A list of network devices with bridge name and optional static IP address."
 }
 
 variable "ssh_public_key" {
@@ -62,4 +65,16 @@ variable "extra_vars" {
   type = map(any)
   description = "A map of extra variables to be passed to the Ansible playbook for additional configuration."
   default = {}
+}
+
+variable "vm_environment" {
+  type        = string
+  description = "Environment tag: dev or prod"
+  default     = "dev"
+}
+
+variable "vm_role" {
+  type        = string
+  description = "VM role: k8s_master, k8s_worker, github_runner, or other"
+  default     = "generic"
 }

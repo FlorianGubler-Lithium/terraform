@@ -1,0 +1,24 @@
+---
+# Default variables for github-runner-setup role
+
+github_org: ""
+github_runner_version: "2.332.0"
+github_runner_user: "github-runner"
+github_runner_home: "/home/github-runner"
+github_runner_group: "default"
+github_runner_labels: []
+
+# Vault variable - must be defined in group_vars/github_runners/vault.yml
+# vault_github_pat: <encrypted_token>
+
+http_proxy: "http://10.30.0.11:3128"
+https_proxy: "http://10.30.0.11:3128"
+no_proxy: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16"
+
+# Map dpkg architecture to runner release architecture
+ansible_architecture_map:
+  x86_64: "x64"
+  aarch64: "arm64"
+
+ansible_architecture: "{{ ansible_architecture_map[ansible_machine] | default('x64') }}"
+

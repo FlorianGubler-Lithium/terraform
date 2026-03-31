@@ -22,10 +22,11 @@ resource "proxmox_virtual_environment_file" "ci_networkdata" {
   source_raw {
     file_name = "ci-${var.vm_name}-networkdata.yaml"
     data = templatefile("${path.root}/${var.vm_ci_networkdata_file_path}", {
-      hostname       = var.vm_name
-      vm_password    = var.vm_password
-      ssh_public_key = var.ssh_public_key
-      extra_vars     = var.extra_vars
+      hostname           = var.vm_name
+      vm_password        = var.vm_password
+      ssh_public_key     = var.ssh_public_key
+      vm_network_devices = var.vm_network_devices
+      extra_vars         = var.extra_vars
     })
   }
 }
@@ -58,10 +59,20 @@ resource "proxmox_virtual_environment_vm" "vm" {
   dynamic "network_device" {
     for_each = var.vm_network_devices
     content {
-      bridge = network_device.value
+      bridge = network_device.value.bridge
       model  = "virtio"
     }
   }
 }
 
 output "vm" { value = proxmox_virtual_environment_vm.vm }
+
+output "vm_metadata" {
+  description = "VM metadata for Ansible inventory generation"
+  value = {
+    name        = var.vm_name
+    environment = var.vm_environment
+    role        = var.vm_role
+    user        = "debian"
+  }
+}
