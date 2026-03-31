@@ -17,6 +17,7 @@ module "mgmt_prod" {
     }
   ]
   ssh_public_key = var.ssh_public_key
+  vm_groups = ["prod", "mgmt"]
 
   pm_node = var.pm_node
 }

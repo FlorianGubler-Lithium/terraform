@@ -21,7 +21,7 @@ resource "proxmox_virtual_environment_sdn_zone_vlan" "backend" {
 
 resource "proxmox_virtual_environment_sdn_vnet" "backend_vnets" {
   for_each = {
-    for k, v in local.backend_network_configurations :
+    for k, v in local.network_configurations :
     k => v if try(v.managed, false)
   }
 

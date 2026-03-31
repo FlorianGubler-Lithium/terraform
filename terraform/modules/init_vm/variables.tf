@@ -67,14 +67,8 @@ variable "extra_vars" {
   default = {}
 }
 
-variable "vm_environment" {
-  type        = string
-  description = "Environment tag: dev or prod"
-  default     = "dev"
-}
-
-variable "vm_role" {
-  type        = string
-  description = "VM role: k8s_master, k8s_worker, github_runner, or other"
-  default     = "generic"
+variable "vm_groups" {
+  type        = list(string)
+  description = "List of groups this VM belongs to (e.g., [\"dev\", \"mgmt\"], [\"prod\", \"k8s\", \"k8s_master\"])"
+  default     = []
 }

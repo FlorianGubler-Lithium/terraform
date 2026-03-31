@@ -17,6 +17,7 @@ module "mgmt_dev" {
     }
   ]
   ssh_public_key = var.ssh_public_key
+  vm_groups = ["dev", "mgmt"]
 
   pm_node = var.pm_node
 }

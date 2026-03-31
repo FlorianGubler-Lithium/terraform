@@ -8,7 +8,7 @@ locals {
   github_runner_version = "2.332.0"
 
   # Proxmox VM Configuration
-  backend_network_configurations = {
+  network_configurations = {
     dev = {
       cidr      = "10.10.0.0/24"
       gateway   = "10.10.0.1"

@@ -1,30 +1,39 @@
-# Terraform Outputs for Kubernetes Infrastructure
+# Ansible Inventory Output
+# Generates the inventory file from Terraform-managed VMs
 
-#########################
-# Infra VM Outputs
-#########################
+locals {
+  # Convert the deployment VMs into a flat list
+  all_vms = [
+    for vm in values(module.deployments_vms.deployment_vms) : vm
+  ]
 
-output "proxy_vm" {
-  description = "Proxy VM details"
+  # Create a map of group names to VMs that belong to each group
+  ansible_groups = {
+    for group in distinct(flatten([for vm in local.all_vms : vm.groups])) :
+    group => [for vm in local.all_vms : vm if contains(vm.groups, group)]
+  }
+
+  # Generate inventory content
+  ansible_inventory = templatefile("${path.module}/templates/inventory.ini.tpl", local.ansible_groups)
+}
+
+output "ansible_inventory_data" {
+  description = "Data for generating Ansible inventory"
   value = {
-    vmid = module.infra_vms.proxy_vm.vm.vm_id
-    name = module.infra_vms.proxy_vm.vm.name
+    all_vms = local.all_vms
+    groups  = local.ansible_groups
   }
 }
 
-output "firewall_vm" {
-  description = "Firewall VM details"
-  value = {
-    vmid = module.infra_vms.firewall_vm.vm.vm_id
-    name = module.infra_vms.firewall_vm.vm.name
-  }
+output "ansible_inventory" {
+  description = "Generated Ansible inventory file"
+  value       = local.ansible_inventory
+  sensitive   = false
 }
 
-output "jump_vm" {
-  description = "Jump VM details"
-  value = {
-    vmid = module.infra_vms.jump_vm.vm.vm_id
-    name = module.infra_vms.jump_vm.vm.name
-  }
+# Write inventory file to output directory
+resource "local_file" "ansible_inventory" {
+  content  = local.ansible_inventory
+  filename = "${path.module}/output/inventory.ini"
 }
 

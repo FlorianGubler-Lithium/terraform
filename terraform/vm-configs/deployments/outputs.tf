@@ -1,30 +1,8 @@
-# output "kube_dev_master_vm" {
-#   description = "Kubernetes Dev Master VM module outputs"
-#   value       = module.kube_dev_master
-# }
-#
-# output "kube_dev_worker_vm" {
-#   description = "Kubernetes Dev Worker VM module outputs"
-#   value       = module.kube_dev_worker
-# }
-#
-# output "kube_prod_master_vm" {
-#   description = "Kubernetes Prod Master VM module outputs"
-#   value       = module.kube_prod_master
-# }
-#
-# output "kube_prod_worker_vm" {
-#   description = "Kubernetes Prod Worker VM module outputs"
-#   value       = module.kube_prod_worker
-# }
-
-output "mgmt_dev_vm" {
-  description = "Management Dev VM module outputs"
-  value       = module.mgmt_dev
+output "deployment_vms" {
+  description = "All deployment VMs with their metadata for Ansible inventory"
+  value = {
+    mgmt_dev  = module.mgmt_dev.vm_metadata
+    mgmt_prod = module.mgmt_prod.vm_metadata
+  }
 }
-
-/*output "mgmt_prod_vm" {
-  description = "Management Prod VM module outputs"
-  value       = module.mgmt_prod
-}*/
 

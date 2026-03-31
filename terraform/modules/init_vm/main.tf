@@ -70,9 +70,9 @@ output "vm" { value = proxmox_virtual_environment_vm.vm }
 output "vm_metadata" {
   description = "VM metadata for Ansible inventory generation"
   value = {
-    name        = var.vm_name
-    environment = var.vm_environment
-    role        = var.vm_role
-    user        = "debian"
+    name   = var.vm_name
+    groups = var.vm_groups
+    user   = "debian"
+    ip     = var.vm_network_devices[0].ip
   }
 }
