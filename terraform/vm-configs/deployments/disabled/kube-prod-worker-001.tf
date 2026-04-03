@@ -13,7 +13,7 @@ module "kube_prod_worker" {
   vm_network_devices = [
     {
       bridge = "prod"
-      ip     = "10.10.0.202/24"
+      ip     = "10.20.0.202/24"
     }
   ]
   ssh_public_key = var.ssh_public_key
