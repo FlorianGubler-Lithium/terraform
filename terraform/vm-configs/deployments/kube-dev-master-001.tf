@@ -1,23 +1,24 @@
 module "kube_dev_master" {
   source = "../../modules/init_vm"
 
-  vm_name   = "kube-dev-master-001"
-  vm_id     = 1001
-  vm_password = var.vm_password
-  vm_ci_userdata_file_path = "vm-configs/deployments/cloud-init/kube-dev-master-001/userdata.yaml.tftpl"
-  vm_ci_networkdata_file_path = "vm-configs/deployments/cloud-init/kube-dev-master-001/network.yaml.tftpl"
-  vm_ci_base_image_file_id = var.vm_ci_base_image_file_id
-  vm_memory = 4096
-  vm_cpu_cores = 2
-  vm_disk_size = 20
+  for_each = local.deployment_vms
+
+  vm_name                     = each.key
+  pm_node                     = each.value.pm_node
+  ssh_public_key              = each.value.ssh_public_key
+  vm_ci_base_image_file_id    = each.value.vm_ci_base_image_file_id
+  vm_ci_networkdata_file_path = each.value.vm_ci_networkdata_file_path
+  vm_ci_userdata_file_path    = each.value.vm_ci_userdata_file_path
+  vm_cpu_cores                = each.value.vm_cpu_cores
+  vm_disk_size                = each.value.vm_disk_size
+  vm_id                       = each.value.vm_id
+  vm_memory                   = each.value.vm_memory
   vm_network_devices = [
-    {
-      bridge = "dev"
-      ip     = "10.10.0.101"
+    for net_dev in each.value.vm_network_devices : {
+      bridge = net_dev.bridge
+      ip     = net_dev.ip
     }
   ]
-  ssh_public_key = var.ssh_public_key
-
-  pm_node = var.pm_node
+  vm_password                 = each.value.vm_password
 }
 
