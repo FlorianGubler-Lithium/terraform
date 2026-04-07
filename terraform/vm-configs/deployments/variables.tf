@@ -18,38 +18,3 @@ variable "ssh_public_key" {
   description = "The SSH public key to be added to the VM for authentication."
   sensitive = true
 }
-
-variable "k8s_version" {
-  type = string
-  description = "Kubernetes version to install (e.g., 1.30.0)"
-  default = "1.30.0"
-}
-
-variable "k8s_pod_cidr_dev" {
-  type = string
-  description = "Pod CIDR for dev Kubernetes cluster"
-  default = "172.16.0.0/16"
-}
-
-variable "k8s_pod_cidr_prod" {
-  type = string
-  description = "Pod CIDR for prod Kubernetes cluster"
-  default = "172.17.0.0/16"
-}
-
-variable "github_pat" {
-  type = string
-  description = "GitHub Personal Access Token with permissions to manage runners and repositories"
-  sensitive = true
-}
-
-variable "github_runner_org" {
-  type = string
-  description = "GitHub organization for runner registration"
-}
-
-variable "github_runner_version" {
-  type = string
-  description = "GitHub Actions runner version to install (e.g., 2.308.0)"
-}
-

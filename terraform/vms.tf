@@ -40,7 +40,4 @@ module "deployments_vms" {
   ssh_public_key = var.ssh_public_key
 
   depends_on = [proxmox_virtual_environment_sdn_applier.sdn_applier, module.infra_vms]
-  github_runner_org        = local.github_runner_org
-  github_runner_version    = local.github_runner_version
-  github_pat  = var.github_pat
 }
