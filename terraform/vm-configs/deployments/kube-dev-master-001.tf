@@ -1,5 +1,5 @@
 module "kube_dev_master" {
-  source = "../../../modules/init_vm"
+  source = "../../modules/init_vm"
 
   vm_name   = "kube-dev-master-001"
   vm_id     = 1001
@@ -13,7 +13,7 @@ module "kube_dev_master" {
   vm_network_devices = [
     {
       bridge = "dev"
-      ip     = "10.10.0.101/24"
+      ip     = "10.10.0.101"
     }
   ]
   ssh_public_key = var.ssh_public_key

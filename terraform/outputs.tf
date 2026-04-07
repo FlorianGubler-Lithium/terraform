@@ -36,6 +36,6 @@ output "ansible_inventory" {
 # Write inventory file to output directory
 resource "local_file" "ansible_inventory" {
   content  = local.ansible_inventory
-  filename = "${path.module}/output/inventory.ini"
+  filename = "${path.module}/../ansible/inventory.ini"
 }
 

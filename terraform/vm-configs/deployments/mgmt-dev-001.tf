@@ -13,7 +13,7 @@ module "mgmt_dev" {
   vm_network_devices = [
     {
       bridge = "dev"
-      ip     = "10.10.0.100/24"
+      ip     = "10.10.0.100"
     }
   ]
   ssh_public_key = var.ssh_public_key

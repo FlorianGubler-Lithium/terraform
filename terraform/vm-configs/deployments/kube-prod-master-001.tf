@@ -1,5 +1,5 @@
 module "kube_prod_master" {
-  source = "../../../modules/init_vm"
+  source = "../../modules/init_vm"
 
   vm_name   = "kube-prod-master-001"
   vm_id     = 2001
@@ -13,7 +13,7 @@ module "kube_prod_master" {
   vm_network_devices = [
     {
       bridge = "prod"
-      ip     = "10.20.0.201/24"
+      ip     = "10.20.0.201"
     }
   ]
   ssh_public_key = var.ssh_public_key

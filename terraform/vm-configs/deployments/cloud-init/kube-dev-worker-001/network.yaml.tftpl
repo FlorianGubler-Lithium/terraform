@@ -6,7 +6,7 @@ ethernets:
   ens${18 + idx}:
 %{ if device.ip != null ~}
     addresses:
-      - ${device.ip}
+      - ${device.ip}/24
     gateway4: 10.10.0.1
     nameservers:
       addresses: [8.8.8.8, 8.8.4.4]
