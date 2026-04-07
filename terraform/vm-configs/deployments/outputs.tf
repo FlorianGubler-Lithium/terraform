@@ -1,8 +1,9 @@
 output "deployment_vms" {
   description = "All deployment VMs with their metadata for Ansible inventory"
-  value = {
-    mgmt_dev  = module.mgmt_dev.vm_metadata
-    mgmt_prod = module.mgmt_prod.vm_metadata
-  }
+  value = merge([
+    for module_name, module_obj in module : {
+      (module_name) = module_obj.vm_metadata
+    } if can(module_obj.vm_metadata)
+  ]...)
 }
 
