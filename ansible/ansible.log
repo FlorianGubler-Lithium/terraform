@@ -1,0 +1,38 @@
+2026-04-08 19:24:41,363 p=929554 u=flogu n=ansible | [DEPRECATION WARNING]: [defaults]callback_whitelist option, normalizing names to new standard, use callbacks_enabled instead. This feature will be removed from ansible-core in 
+version 2.15. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2026-04-08 19:24:41,366 p=929554 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
+2026-04-08 19:24:41,367 p=929554 u=flogu n=ansible | [WARNING]: Error getting vault password file (default): The vault password file /home/flogu/lithium-infra/ansible/.vaultpass was not found
+
+2026-04-08 19:24:41,368 p=929554 u=flogu n=ansible | ERROR! The vault password file /home/flogu/lithium-infra/ansible/.vaultpass was not found
+2026-04-08 19:28:53,847 p=930007 u=flogu n=ansible | [DEPRECATION WARNING]: [defaults]callback_whitelist option, normalizing names to new standard, use callbacks_enabled instead. This feature will be removed from ansible-core in 
+version 2.15. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2026-04-08 19:28:53,850 p=930007 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
+2026-04-08 19:28:53,852 p=930007 u=flogu n=ansible | [WARNING]: Error getting vault password file (default): The vault password file /home/flogu/lithium-infra/ansible/.vaultpass was not found
+
+2026-04-08 19:28:53,854 p=930007 u=flogu n=ansible | ERROR! input is not vault encrypted data.  for /home/flogu/lithium-infra/ansible/group_vars/inframgmt_vms/vault.yml
+2026-04-08 19:29:19,603 p=930040 u=flogu n=ansible | [DEPRECATION WARNING]: [defaults]callback_whitelist option, normalizing names to new standard, use callbacks_enabled instead. This feature will be removed from ansible-core in 
+version 2.15. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2026-04-08 19:29:19,604 p=930040 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
+2026-04-08 19:29:19,605 p=930040 u=flogu n=ansible | [WARNING]: Error getting vault password file (default): The vault password file /home/flogu/lithium-infra/ansible/.vaultpass was not found
+
+2026-04-08 19:29:19,607 p=930040 u=flogu n=ansible | ERROR! input is not vault encrypted data.  for /home/flogu/lithium-infra/ansible/group_vars/inframgmt_vms/vault.yml
+2026-04-08 19:29:57,376 p=930131 u=flogu n=ansible | [DEPRECATION WARNING]: [defaults]callback_whitelist option, normalizing names to new standard, use callbacks_enabled instead. This feature will be removed from ansible-core in 
+version 2.15. Deprecation warnings can be disabled by setting deprecation_warnings=False in ansible.cfg.
+2026-04-08 19:29:57,378 p=930131 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
+2026-04-08 19:29:57,379 p=930131 u=flogu n=ansible | [WARNING]: Error getting vault password file (default): The vault password file /home/flogu/lithium-infra/ansible/.vaultpass was not found
+
+2026-04-08 19:29:57,379 p=930131 u=flogu n=ansible | ERROR! The vault password file /home/flogu/lithium-infra/ansible/.vaultpass was not found
+2026-04-08 19:33:36,028 p=930506 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
+2026-04-08 19:33:36,030 p=930506 u=flogu n=ansible | ERROR! input is not vault encrypted data.  for /home/flogu/lithium-infra/ansible/group_vars/inframgmt_vms/vault.yml
+2026-04-08 19:33:55,663 p=930552 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
+2026-04-08 19:33:55,664 p=930552 u=flogu n=ansible | ERROR! Unable to read source file (/home/flogu/lithium-infra/ansible/group_vars/inframgmt_vms/vault.yml): [Errno 2] No such file or directory: '/home/flogu/lithium-infra/ansible/group_vars/inframgmt_vms/vault.yml'
+2026-04-08 19:34:17,429 p=930583 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
+2026-04-08 19:36:16,885 p=930798 u=flogu n=ansible | [WARNING]: Error getting vault password file (None): The vault password file /home/flogu/lithium-infra/ansible/default was not found
+
