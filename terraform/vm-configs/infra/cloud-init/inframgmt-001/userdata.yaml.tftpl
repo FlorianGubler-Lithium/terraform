@@ -30,14 +30,6 @@ users:
     plain_text_passwd: "${vm_password}"
     ssh_authorized_keys:
       - ${ssh_public_key}
-  - name: ansible
-    gecos: Ansible Automation User
-    sudo: ALL=(ALL) NOPASSWD:ALL
-    groups: sudo
-    shell: /bin/bash
-    lock_passwd: true
-    ssh_authorized_keys:
-      - ${ssh_public_key}
   - name: root
     lock_passwd: false
     plain_text_passwd: "${vm_password}"
@@ -64,6 +56,11 @@ packages:
   - jq
   - vim
   - nano
+  - postgresql
+  - postgresql-client
+  - wget
+  - unzip
+  - awscli
 
 # Configure SSH
 ssh:
@@ -107,15 +104,21 @@ runcmd:
   - git config --global http.proxy http://10.30.0.11:3128
   - git config --global https.proxy http://10.30.0.11:3128
 
-
   # Setup Ansible directories
   - mkdir -p /etc/ansible
   - mkdir -p /var/log/ansible
-  - chown -R ansible:ansible /var/log/ansible
 
-  # Install Ansible collection requirements via pip for better dependency management
+  # Install Ansible
   - pip3 install --proxy http://10.30.0.11:3128 -q ansible-core==2.16.0
   - pip3 install --proxy http://10.30.0.11:3128 -q jinja2 pyyaml
+
+  # Install Terraform
+  - sudo apt-get install -y gnupg software-properties-common
+  - wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor | sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg > /dev/null
+  - gpg --no-default-keyring --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg --fingerprint
+  - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+  - sudo apt update
+  - sudo apt install -y terraform
 
 # Final message
 final_message: "Ansible control node booted successfully. Instance uptime: $UPTIME seconds"

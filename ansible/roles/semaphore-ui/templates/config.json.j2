@@ -1,0 +1,27 @@
+{
+  "port": {{ semaphore_port }},
+  "mysql": {
+    "host": "{{ semaphore_db_host }}",
+    "user": "{{ semaphore_db_user }}",
+    "pass": "{{ semaphore_db_password }}",
+    "name": "{{ semaphore_db_name }}"
+  },
+  "postgres": {
+    "host": "{{ semaphore_db_host }}",
+    "user": "{{ semaphore_db_user }}",
+    "pass": "{{ semaphore_db_password }}",
+    "name": "{{ semaphore_db_name }}",
+    "port": "{{ semaphore_db_port }}"
+  },
+  "web_host": "{{ semaphore_listen_address }}",
+  "web_protocol": "http",
+  "cookie_hash": "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=16') }}",
+  "cookie_encryption": "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=16') }}",
+  "access_key_encryption": "{{ lookup('password', '/dev/null chars=ascii_letters,digits length=16') }}",
+  "ansible": {
+    "host": "127.0.0.1",
+    "connection": "local"
+  },
+  "tmp_path": "{{ semaphore_tmp_path }}"
+}
+

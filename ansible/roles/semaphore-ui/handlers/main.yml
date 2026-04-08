@@ -1,0 +1,9 @@
+---
+# Semaphore UI Role - Handlers
+
+- name: Restart Semaphore
+  ansible.builtin.systemd:
+    name: semaphore
+    state: restarted
+  become: yes
+

@@ -1,0 +1,35 @@
+---
+# Semaphore UI Role - Default variables
+
+semaphore_version: "2.10.1"
+semaphore_user: "semaphore"
+semaphore_home: "/home/semaphore"
+semaphore_config_dir: "/etc/semaphore"
+semaphore_data_dir: "/var/lib/semaphore"
+semaphore_port: 3000
+
+# Database configuration
+semaphore_db_host: "localhost"
+semaphore_db_port: 5432
+semaphore_db_name: "semaphore"
+semaphore_db_user: "semaphore"
+# semaphore_db_password defined in group_vars vault
+# Maps from vault_semaphore_db_password variable
+
+# Admin user
+semaphore_admin_username: "admin"
+# semaphore_admin_password defined in group_vars vault
+semaphore_admin_email: "admin@lithium.local"
+
+# HTTP settings
+semaphore_listen_address: "0.0.0.0"
+semaphore_tmp_path: "/tmp/semaphore"
+
+# Proxy settings (inherited from parent playbook/group vars)
+http_proxy: "http://10.30.0.11:3128"
+https_proxy: "http://10.30.0.11:3128"
+no_proxy: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16"
+
+# Semaphore download URL
+semaphore_download_url: "https://github.com/ansible-semaphore/semaphore/releases/download/v{{ semaphore_version }}/semaphore_{{ semaphore_version }}_linux_amd64.deb"
+

@@ -1,0 +1,7 @@
+---
+# Semaphore UI vault secrets
+# IMPORTANT: Encrypt this file with: ansible-vault encrypt ansible/group_vars/inframgmt_vms/vault.yml
+
+vault_semaphore_db_password: "ChangeMeToSecurePassword123!"
+vault_semaphore_admin_password: "ChangeMeToSecureAdminPassword456!"
+

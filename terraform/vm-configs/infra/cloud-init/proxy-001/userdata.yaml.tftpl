@@ -80,6 +80,9 @@ write_files:
       # Destination: GitHub Action Runner URLs
       acl github_urls dstdomain .github.com .githubusercontent.com github-cloud.s3.amazonaws.com github-production-release-asset-2e65be.s3.amazonaws.com
 
+      # Destination: Allow hashicorp URLs for Terraform and Vault updates
+      acl hashicorp_repos dstdomain .hashicorp.com
+
       # Standard rules
       acl SSL_ports port 443
       acl Safe_ports port 80 443

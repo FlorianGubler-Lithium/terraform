@@ -1,0 +1,29 @@
+[Unit]
+Description=Semaphore UI - Ansible Web Interface
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User={{ semaphore_user }}
+Group={{ semaphore_user }}
+WorkingDirectory={{ semaphore_data_dir }}
+ExecStart=/usr/bin/semaphore service --config {{ semaphore_config_dir }}/config.json
+Restart=always
+RestartSec=10
+
+# Environment variables
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+Environment="HOME={{ semaphore_home }}"
+
+# Security options
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Timeout settings
+TimeoutStartSec=30
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target
+

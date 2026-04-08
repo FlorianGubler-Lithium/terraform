@@ -11,3 +11,7 @@
   import_playbook: github-runner-setup.yml
   tags: [github-runner, runners]
 
+- name: Setup Semaphore UI
+  import_playbook: semaphore-setup.yml
+  tags: [semaphore, ui]
+

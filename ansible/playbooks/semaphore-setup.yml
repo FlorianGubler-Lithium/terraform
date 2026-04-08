@@ -1,0 +1,72 @@
+---
+# Semaphore UI Installation Playbook
+# Installs and configures Semaphore Web UI on the Ansible control node
+
+- name: Install Semaphore UI
+  hosts: inframgmt_vms
+  gather_facts: yes
+  become: no
+
+  vars:
+    # Map vault secrets to role variables
+    semaphore_db_password: "{{ vault_semaphore_db_password }}"
+    semaphore_admin_password: "{{ vault_semaphore_admin_password }}"
+
+  pre_tasks:
+    - name: Wait for SSH to be ready
+      ansible.builtin.wait_for_connection:
+        delay: 10
+        timeout: 300
+
+    - name: Verify Semaphore credentials are available
+      ansible.builtin.assert:
+        that:
+          - vault_semaphore_db_password is defined
+          - vault_semaphore_db_password | length > 0
+          - vault_semaphore_admin_password is defined
+          - vault_semaphore_admin_password | length > 0
+        fail_msg: "Semaphore credentials not defined. Ensure Ansible vault is unlocked with correct password."
+      no_log: true
+
+    - name: Display Semaphore installation information
+      ansible.builtin.debug:
+        msg: |
+          Installing Semaphore UI (v{{ semaphore_version }})
+          Host: {{ inventory_hostname }}
+          Database: {{ semaphore_db_name }}
+          Admin Email: {{ semaphore_admin_email }}
+          Listen Port: {{ semaphore_port }}
+
+  roles:
+    - role: semaphore-ui
+      tags: [semaphore, ui, setup]
+
+  post_tasks:
+    - name: Verify Semaphore API is accessible
+      ansible.builtin.uri:
+        url: "http://localhost:{{ semaphore_port }}/api/info"
+        method: GET
+        status_code: 200
+      retries: 3
+      delay: 5
+      until: false
+      ignore_errors: yes
+
+    - name: Display Semaphore access information
+      ansible.builtin.debug:
+        msg: |
+          ========================================
+          Semaphore UI Installation Complete!
+          ========================================
+          Access URL: http://{{ ansible_default_ipv4.address }}:{{ semaphore_port }}
+          Admin Username: {{ semaphore_admin_username }}
+          Admin Email: {{ semaphore_admin_email }}
+          
+          Database: {{ semaphore_db_name }}
+          Database Host: {{ semaphore_db_host }}:{{ semaphore_db_port }}
+          Database User: {{ semaphore_db_user }}
+          
+          Configuration: {{ semaphore_config_dir }}/config.json
+          Data Directory: {{ semaphore_data_dir }}
+          ========================================
+

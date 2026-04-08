@@ -1,0 +1,25 @@
+---
+# Semaphore UI group variables
+
+semaphore_version: "2.10.1"
+semaphore_port: 3000
+semaphore_listen_address: "0.0.0.0"
+
+# Admin credentials - stored in vault for production use
+# vault_semaphore_db_password: <encrypted_password>
+# vault_semaphore_admin_password: <encrypted_password>
+
+semaphore_admin_email: "admin@lithium.local"
+semaphore_admin_username: "admin"
+
+# Database configuration
+semaphore_db_host: "localhost"
+semaphore_db_port: 5432
+semaphore_db_name: "semaphore"
+semaphore_db_user: "semaphore"
+
+# Proxy settings (matching inframgmt infrastructure)
+http_proxy: "http://10.30.0.11:3128"
+https_proxy: "http://10.30.0.11:3128"
+no_proxy: "localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16"
+

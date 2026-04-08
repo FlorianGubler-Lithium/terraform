@@ -1,0 +1,166 @@
+---
+# Semaphore UI Role - Main tasks
+
+- name: Wait for system to be ready
+  ansible.builtin.wait_for_connection:
+    delay: 10
+    timeout: 300
+
+- name: Install PostgreSQL client
+  ansible.builtin.apt:
+    name:
+      - postgresql-client
+      - postgresql
+    state: present
+    update_cache: yes
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+  become: yes
+
+- name: Ensure PostgreSQL is started and enabled
+  ansible.builtin.systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Create semaphore system user
+  ansible.builtin.user:
+    name: "{{ semaphore_user }}"
+    home: "{{ semaphore_home }}"
+    shell: /bin/bash
+    state: present
+    system: no
+  become: yes
+
+- name: Create Semaphore directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ semaphore_user }}"
+    group: "{{ semaphore_user }}"
+    mode: '0755'
+  with_items:
+    - "{{ semaphore_config_dir }}"
+    - "{{ semaphore_data_dir }}"
+    - "{{ semaphore_tmp_path }}"
+  become: yes
+
+- name: Configure PostgreSQL for Semaphore
+  ansible.builtin.shell: |
+    sudo -u postgres psql -tc "SELECT 1 FROM pg_database WHERE datname = '{{ semaphore_db_name }}'" | grep -q 1 || sudo -u postgres createdb {{ semaphore_db_name }}
+    sudo -u postgres psql -tc "SELECT 1 FROM pg_user WHERE usename = '{{ semaphore_db_user }}'" | grep -q 1 || sudo -u postgres psql -c "CREATE USER {{ semaphore_db_user }} WITH PASSWORD '{{ semaphore_db_password }}';"
+    sudo -u postgres psql -c "ALTER ROLE {{ semaphore_db_user }} WITH PASSWORD '{{ semaphore_db_password }}';"
+    sudo -u postgres psql -d {{ semaphore_db_name }} -c "GRANT ALL PRIVILEGES ON SCHEMA public TO {{ semaphore_db_user }};"
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+  no_log: true
+  become: yes
+
+- name: Download Semaphore UI binary
+  ansible.builtin.get_url:
+    url: "{{ semaphore_download_url }}"
+    dest: "/tmp/semaphore_{{ semaphore_version }}.deb"
+    mode: '0644'
+    timeout: 60
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+
+- name: Install Semaphore UI package
+  ansible.builtin.apt:
+    deb: "/tmp/semaphore_{{ semaphore_version }}.deb"
+    state: present
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+  become: yes
+  register: semaphore_install
+
+- name: Create Semaphore configuration file
+  ansible.builtin.template:
+    src: config.json.j2
+    dest: "{{ semaphore_config_dir }}/config.json"
+    owner: "{{ semaphore_user }}"
+    group: "{{ semaphore_user }}"
+    mode: '0640'
+  become: yes
+
+- name: Initialize Semaphore database
+  ansible.builtin.shell: |
+    /usr/bin/semaphore migrate --config {{ semaphore_config_dir }}/config.json
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+  become: yes
+  become_user: "{{ semaphore_user }}"
+  register: db_migration
+  changed_when: "'migration' in db_migration.stdout"
+
+- name: Create admin user
+  ansible.builtin.shell: |
+    /usr/bin/semaphore user add \
+      --email "{{ semaphore_admin_email }}" \
+      --name "Admin User" \
+      --login "{{ semaphore_admin_username }}" \
+      --password "{{ semaphore_admin_password }}" \
+      --admin \
+      --config "{{ semaphore_config_dir }}/config.json" 2>/dev/null || true
+  environment:
+    http_proxy: "{{ http_proxy }}"
+    https_proxy: "{{ https_proxy }}"
+  no_log: true
+  become: yes
+  become_user: "{{ semaphore_user }}"
+  changed_when: false
+
+- name: Create Semaphore systemd service
+  ansible.builtin.template:
+    src: semaphore.service.j2
+    dest: /etc/systemd/system/semaphore.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: Restart Semaphore
+
+- name: Reload systemd daemon
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  become: yes
+
+- name: Enable and start Semaphore service
+  ansible.builtin.systemd:
+    name: semaphore
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Wait for Semaphore to be ready
+  ansible.builtin.wait_for:
+    host: "{{ semaphore_listen_address }}"
+    port: "{{ semaphore_port }}"
+    delay: 5
+    timeout: 60
+  become: yes
+
+- name: Verify Semaphore is running
+  ansible.builtin.uri:
+    url: "http://localhost:{{ semaphore_port }}/api/info"
+    method: GET
+    status_code: 200
+  register: semaphore_status
+  retries: 3
+  delay: 5
+  until: semaphore_status.status == 200
+
+- name: Display Semaphore access information
+  ansible.builtin.debug:
+    msg: |
+      Semaphore UI has been successfully installed!
+      Access URL: http://{{ ansible_default_ipv4.address }}:{{ semaphore_port }}
+      Admin Username: {{ semaphore_admin_username }}
+      Admin Email: {{ semaphore_admin_email }}
+
