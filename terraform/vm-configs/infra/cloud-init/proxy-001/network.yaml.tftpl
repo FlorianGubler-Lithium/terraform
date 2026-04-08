@@ -1,21 +1,14 @@
 version: 2
 renderer: networkd
 ethernets:
-  # External/Internet interface - ens18
-  ens18:
+%{ for idx, device in vm_network_devices ~}
+  # Interface ${idx + 1} (${device.bridge} network)
+  ens${18 + idx}:
+%{ if device.ip != null ~}
     addresses:
-      - ${vm_network_devices[0].ip}
+      - ${device.ip}
     dhcp4: false
-    routes:
-      - to: default
-        via: 192.168.1.1
-        metric: 100
-  # Infra zone interface - ens19
-  ens19:
-    addresses:
-      - ${vm_network_devices[1].ip}
-    dhcp4: false
-    routes:
-      - to: 10.30.0.0/24
-        via: 10.30.0.1
-        metric: 200
+%{ else ~}
+    dhcp4: true
+%{ endif ~}
+%{ endfor ~}

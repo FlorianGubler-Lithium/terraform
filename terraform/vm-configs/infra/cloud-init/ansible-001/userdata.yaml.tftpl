@@ -1,0 +1,122 @@
+#cloud-config
+# Debian 13 cloud-init configuration for Ansible Control Node
+
+hostname: ${hostname}
+preserve_hostname: false
+
+# Set timezone
+timezone: Europe/Zurich
+
+# Update system
+apt:
+  preserve_sources_list: true
+  primary:
+    - arches: [amd64, i386]
+      uri: "http://deb.debian.org/debian"
+  security:
+    - arches: [amd64, i386]
+      uri: "http://security.debian.org/debian-security"
+  http_proxy: "http://10.30.0.11:3128"
+  https_proxy: "http://10.30.0.11:3128"
+
+# Users and groups
+users:
+  - name: debian
+    gecos: Debian User
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: sudo,docker,wheel
+    shell: /bin/bash
+    lock_passwd: false
+    plain_text_passwd: "${vm_password}"
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+  - name: ansible
+    gecos: Ansible Automation User
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    groups: sudo
+    shell: /bin/bash
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ${ssh_public_key}
+  - name: root
+    lock_passwd: false
+    plain_text_passwd: "${vm_password}"
+
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+
+# Install required packages
+packages:
+  - curl
+  - git
+  - openssh-server
+  - openssh-client
+  - ca-certificates
+  - gnupg
+  - apt-transport-https
+  - qemu-guest-agent
+  - ansible
+  - python3
+  - python3-pip
+  - python3-venv
+  - sshpass
+  - jq
+  - vim
+  - nano
+
+# Configure SSH
+ssh:
+  emit_keys_to_console: false
+
+# Boot commands for proxy environment variables
+bootcmd:
+  - echo "http_proxy=http://10.30.0.11:3128" >> /etc/environment
+  - echo "https_proxy=http://10.30.0.11:3128" >> /etc/environment
+  - echo "HTTP_PROXY=http://10.30.0.11:3128" >> /etc/environment
+  - echo "HTTPS_PROXY=http://10.30.0.11:3128" >> /etc/environment
+  - echo "no_proxy=localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16" >> /etc/environment
+
+# Create ansible user for running playbooks
+# This allows running ansible commands as 'ansible' user with SSH keys
+write_files:
+  - path: /etc/ansible/ansible.cfg
+    owner: root:root
+    permissions: '0644'
+    content: |
+      [defaults]
+      inventory = /etc/ansible/inventory.ini
+      host_key_checking = False
+      timeout = 30
+      remote_user = debian
+      ask_pass = False
+      private_key_file = ~/.ssh/id_rsa
+
+      [privilege_escalation]
+      become = True
+      become_method = sudo
+      become_user = root
+      become_ask_pass = False
+
+# Run commands to set up Ansible and related tools
+runcmd:
+  - systemctl enable qemu-guest-agent
+  - systemctl start qemu-guest-agent
+
+  # Configure git proxy
+  - git config --global http.proxy http://10.30.0.11:3128
+  - git config --global https.proxy http://10.30.0.11:3128
+
+
+  # Setup Ansible directories
+  - mkdir -p /etc/ansible
+  - mkdir -p /var/log/ansible
+  - chown -R ansible:ansible /var/log/ansible
+
+  # Install Ansible collection requirements via pip for better dependency management
+  - pip3 install --proxy http://10.30.0.11:3128 -q ansible-core==2.16.0
+  - pip3 install --proxy http://10.30.0.11:3128 -q jinja2 pyyaml
+
+# Final message
+final_message: "Ansible control node booted successfully. Instance uptime: $UPTIME seconds"
+
