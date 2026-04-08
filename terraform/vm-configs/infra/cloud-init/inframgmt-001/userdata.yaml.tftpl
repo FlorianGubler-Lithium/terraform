@@ -112,6 +112,9 @@ write_files:
         "dialect": "postgres",
         "tmp_path": "/tmp/semaphore",
         "port": "3000",
+        "cookie_hash": "${semaphore_cookie_hash}",
+        "cookie_encryption": "${semaphore_cookie_encryption}",
+        "access_key_encryption": "${semaphore_access_key_encryption}",
         "ansible": {
           "host": "127.0.0.1",
           "connection": "local"

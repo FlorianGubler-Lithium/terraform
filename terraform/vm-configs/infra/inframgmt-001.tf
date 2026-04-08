@@ -1,3 +1,18 @@
+resource "random_password" "semaphore_cookie_hash" {
+  length  = 32
+  special = true
+}
+
+resource "random_password" "semaphore_cookie_encryption" {
+  length  = 32
+  special = true
+}
+
+resource "random_password" "semaphore_access_key_encryption" {
+  length  = 32
+  special = true
+}
+
 module "ansible_vm" {
   source = "../../modules/init_vm/"
 
@@ -24,9 +39,12 @@ module "ansible_vm" {
 
   # Semaphore configuration
   extra_vars = {
-    semaphore_version            = var.semaphore_version
-    semaphore_admin_password     = var.semaphore_admin_password
-    semaphore_db_password        = var.semaphore_db_password
+    semaphore_version                = var.semaphore_version
+    semaphore_admin_password         = var.semaphore_admin_password
+    semaphore_db_password            = var.semaphore_db_password
+    semaphore_cookie_hash            = base64encode(random_password.semaphore_cookie_hash.result)
+    semaphore_cookie_encryption      = base64encode(random_password.semaphore_cookie_encryption.result)
+    semaphore_access_key_encryption  = base64encode(random_password.semaphore_access_key_encryption.result)
   }
 
   pm_node = var.pm_node
