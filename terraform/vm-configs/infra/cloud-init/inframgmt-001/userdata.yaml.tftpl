@@ -35,11 +35,9 @@ users:
     plain_text_passwd: "${vm_password}"
   - name: semaphore
     gecos: Semaphore UI
-    groups: semaphore
     shell: /bin/bash
     lock_passwd: true
     homedir: /home/semaphore
-    plain_text_passwd: "${vm_password}"
 
 package_update: true
 package_upgrade: true
@@ -135,7 +133,6 @@ write_files:
       [Service]
       Type=simple
       User=semaphore
-      Group=semaphore
       WorkingDirectory=/var/lib/semaphore
       ExecStart=/usr/bin/semaphore service --config /etc/semaphore/config.json
       Restart=always
@@ -177,7 +174,7 @@ runcmd:
   - sudo -u postgres psql -d semaphore -c "GRANT ALL PRIVILEGES ON SCHEMA public TO semaphore;"
 
   # Set proper permissions
-  - chown semaphore:semaphore /etc/semaphore/config.json
+  - chown semaphore /etc/semaphore/config.json
 
   # Download and install Semaphore
   - cd /tmp && wget https://github.com/semaphoreui/semaphore/releases/download/v${semaphore_version}/semaphore_${semaphore_version}_linux_amd64.deb
