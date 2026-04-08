@@ -12,10 +12,6 @@ module "ansible_vm" {
   vm_disk_size = 20
   vm_network_devices = [
     {
-      bridge = "vmbr0"
-      ip     = "192.168.1.32"
-    },
-    {
       bridge = "infra"
       ip     = "10.30.0.20"
     }
