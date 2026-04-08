@@ -96,6 +96,7 @@ write_files:
       http_access allow trusted_networks debian_repos
       http_access allow trusted_networks k8s_repos
       http_access allow trusted_networks github_urls
+      http_access allow trusted_networks hashicorp_repos
 
       # Deny all other access
       http_access deny all
