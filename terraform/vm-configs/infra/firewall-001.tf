@@ -13,15 +13,15 @@ module "firewall_vm" {
   vm_network_devices = [
     {
       bridge = "dev"
-      ip     = "10.10.0.1/24"
+      ip     = "10.10.0.1"
     },
     {
       bridge = "prod"
-      ip     = "10.20.0.1/24"
+      ip     = "10.20.0.1"
     },
     {
       bridge = "infra"
-      ip     = "10.30.0.1/24"
+      ip     = "10.30.0.1"
     }
   ]
   ssh_public_key = var.ssh_public_key

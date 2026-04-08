@@ -4,7 +4,7 @@ ethernets:
   # External/Internet interface - ens18
   ens18:
     addresses:
-      - ${vm_network_devices[0].ip}
+      - ${vm_network_devices[0].ip}/24
     dhcp4: false
     routes:
       - to: 192.168.1.0/24
@@ -13,7 +13,7 @@ ethernets:
   # Infra zone interface - ens19
   ens19:
     addresses:
-      - ${vm_network_devices[1].ip}
+      - ${vm_network_devices[1].ip}/24
     dhcp4: false
     routes:
       - to: 10.30.0.0/24

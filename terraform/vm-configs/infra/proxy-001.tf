@@ -13,11 +13,11 @@ module "proxy_vm" {
   vm_network_devices = [
     {
       bridge = "vmbr0"
-      ip     = "192.168.1.31/24"
+      ip     = "192.168.1.31"
     },
     {
       bridge = "infra"
-      ip     = "10.30.0.11/24"
+      ip     = "10.30.0.11"
     }
   ]
   ssh_public_key = var.ssh_public_key

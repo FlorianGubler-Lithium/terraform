@@ -6,7 +6,7 @@ ethernets:
   ens${18 + idx}:
 %{ if device.ip != null ~}
     addresses:
-      - ${device.ip}
+      - ${device.ip}/24
     dhcp4: false
 %{ else ~}
     dhcp4: true

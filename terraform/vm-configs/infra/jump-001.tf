@@ -13,11 +13,11 @@ module "jump_vm" {
   vm_network_devices = [
     {
       bridge = "vmbr0"
-      ip     = "192.168.1.30/24"
+      ip     = "192.168.1.30"
     },
     {
       bridge = "infra"
-      ip     = "10.30.0.10/24"
+      ip     = "10.30.0.10"
     }
   ]
   ssh_public_key = var.ssh_public_key

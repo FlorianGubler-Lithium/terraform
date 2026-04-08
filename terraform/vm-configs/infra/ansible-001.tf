@@ -13,11 +13,11 @@ module "ansible_vm" {
   vm_network_devices = [
     {
       bridge = "vmbr0"
-      ip     = "192.168.1.32/24"
+      ip     = "192.168.1.32"
     },
     {
       bridge = "infra"
-      ip     = "10.30.0.20/24"
+      ip     = "10.30.0.20"
     }
   ]
   ssh_public_key = var.ssh_public_key
