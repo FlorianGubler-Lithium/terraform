@@ -88,10 +88,11 @@ runcmd:
   # Allow other established traffic from dev zone to infra zone
   - iptables -A FORWARD -i ens18 -o ens20 -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-  # Allow dev zone to reach other infrastructure services (SSH, DNS, etc)
+  # Allow dev zone to reach other infrastructure services (SSH, DNS, PING, etc)
   - iptables -A FORWARD -i ens18 -o ens20 -p tcp --dport 22 -j ACCEPT
   - iptables -A FORWARD -i ens18 -o ens20 -p udp --dport 53 -j ACCEPT
   - iptables -A FORWARD -i ens18 -o ens20 -p tcp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens18 -o ens20 -p icmp -j ACCEPT
 
   # ===== PROD ZONE (ens19) PROXY ENFORCEMENT RULES =====
   # Allow prod zone to reach proxy on port 3128
@@ -105,15 +106,26 @@ runcmd:
   # Allow other established traffic from prod zone to infra zone
   - iptables -A FORWARD -i ens19 -o ens20 -m state --state ESTABLISHED,RELATED -j ACCEPT
 
-  # Allow prod zone to reach other infrastructure services (SSH, DNS, etc)
+  # Allow prod zone to reach other infrastructure services (SSH, DNS, PING, etc)
   - iptables -A FORWARD -i ens19 -o ens20 -p tcp --dport 22 -j ACCEPT
   - iptables -A FORWARD -i ens19 -o ens20 -p udp --dport 53 -j ACCEPT
   - iptables -A FORWARD -i ens19 -o ens20 -p tcp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens19 -o ens20 -p icmp -j ACCEPT
 
   # ===== INFRA ZONE (ens20) TO OTHER ZONES =====
   # Allow established traffic from infra to dev/prod (return packets)
   - iptables -A FORWARD -i ens20 -o ens18 -m state --state ESTABLISHED,RELATED -j ACCEPT
   - iptables -A FORWARD -i ens20 -o ens19 -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+    # Allow infra zone to reach dev/prod zones for management (SSH, DNS, PING, etc)
+  - iptables -A FORWARD -i ens20 -o ens18 -p tcp --dport 22 -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens18 -p udp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens18 -p tcp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens18 -p icmp -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens19 -p tcp --dport 22 -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens19 -p udp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens19 -p tcp --dport 53 -j ACCEPT
+  - iptables -A FORWARD -i ens20 -o ens19 -p icmp -j ACCEPT
 
   # ===== NAT RULES =====
   # Masquerade traffic from dev/prod zones going out (for external connectivity via proxy)
