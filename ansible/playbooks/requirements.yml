@@ -1,0 +1,15 @@
+---
+# Ansible Galaxy requirements for playbooks
+# Installs required roles before playbook execution
+
+collections:
+  - name: community.general
+    version: ">=5.0.0"
+
+roles:
+  # Local roles are resolved relative to the roles_path configuration
+  # Ensure ansible.cfg has roles_path configured to include parent roles directory
+  - name: github-runner-setup
+    src: ../roles/github-runner-setup
+    version: main
+
