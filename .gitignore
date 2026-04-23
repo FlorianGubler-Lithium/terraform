@@ -1,8 +1,7 @@
 /.idea/
-ansible/ansible.log
-terraform/terraform.tfvars
-terraform/.terraform
-terraform/.terraform.lock.hcl
+terraform.tfvars
+.terraform
+.terraform.lock.hcl
 
 # Terraform state files (contain sensitive data)
 *.tfstate
